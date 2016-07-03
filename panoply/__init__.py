@@ -7,7 +7,7 @@ import Queue
 import logging
 from copy import copy
 
-VERSION = "1.0.12"
+VERSION = "1.1.0"
 PKGNAME = "panoply-python-sdk"
 MAXSIZE = 1024 * 250 # 250kib
 FLUSH_TIMEOUT = 2.0 # 2 seconds
