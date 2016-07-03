@@ -46,7 +46,7 @@ class SDK ( object ):
 
         # construct the queue url
         # queue: sdk-ACCOUNT-RAND2
-        self.qurl = "https://sqs.%s.amazonaws.com/%s/xsdk-%s-%s" % ( 
+        self.qurl = "https://sqs.%s.amazonaws.com/%s/sdk-%s-%s" % ( 
             region, 
             awsaccount, 
             account, 
@@ -97,6 +97,7 @@ class SDK ( object ):
             "Content-Length": len( body ),
             "Content-Type": "application/x-www-form-urlencoded"
         }
+        print "SENDING NOW"
 
         req = urllib2.Request( self.qurl, body, headers )
         self._onsend( req )
