@@ -17,5 +17,5 @@ class DataSource(object):
         else:
             print msgs
 
-    def progress(loaded, total, msg):
+    def progress(self, loaded, total, msg):
         pass
