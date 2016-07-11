@@ -21,5 +21,10 @@ class DataSource(events.Emitter):
             print msgs
 
     def progress(self, loaded, total, msg):
-        pass
-    
+        self.fire("progress", {
+            "loaded": loaded,
+            "total": total,
+            "msg": msg
+        })
+
+

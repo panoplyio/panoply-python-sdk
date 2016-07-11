@@ -2,4 +2,5 @@
 setup.py
 panoply/__init__.py
 panoply/datasource.py
+panoply/events.py
 panoply/sdk.py
