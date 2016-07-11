@@ -1,12 +1,15 @@
+import events
 
 # abstract DataSource object
-class DataSource(object):
+class DataSource(events.Emitter):
 
     source = None
     options = None
 
     # data source constructor
     def __init__(self, source, options = {}):
+        super(DataSource, self).__init__()
+        
         self.source = source
         self.options = options
 
@@ -19,3 +22,4 @@ class DataSource(object):
 
     def progress(self, loaded, total, msg):
         pass
+    

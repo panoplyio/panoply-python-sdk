@@ -7,10 +7,9 @@ import Queue
 import logging
 from copy import copy
 
-def noop( self, *args, **kwargs ):
-    pass
+import events
 
-class SDK ( object ):
+class SDK ( events.Emitter ):
 
     account = None
     apikey = None
@@ -21,12 +20,10 @@ class SDK ( object ):
 
     # internal buffer queue
     _buffer = None
-    _onerror = noop
-    _onsend = noop
-    _onflush = noop
-
 
     def __init__( self, apikey, apisecret ):
+        super( SDK, self ).__init__()
+
         self.apikey = apikey
         self.apisecret = apisecret
 
@@ -61,15 +58,6 @@ class SDK ( object ):
         data = urllib2.quote( data )
         self._buffer.put( data + "\n" )
 
-    def on( self, type_, fn ):
-        if type_ == "error":
-            self._onerror = fn
-        elif type_ == "send":
-            self._onsend = fn
-        elif type_ == "flush":
-            self._onflush = fn
-        return self
-
     # flush the buffer to SQS
     def _send( self, body ):
         body = [
@@ -95,13 +83,13 @@ class SDK ( object ):
         print "SENDING NOW"
 
         req = urllib2.Request( self.qurl, body, headers )
-        self._onsend( req )
+        self.fire( "send", req )
         try:
             res = urllib2.urlopen( req )
         except Exception as err:
-            self._onerror( err )
+            self.fire( "error", err )
             return
-        self._onflush( req, res )
+        self.fire( "flush", req, res )
 
     def _sendloop ( self ):
         buf = self._buffer
