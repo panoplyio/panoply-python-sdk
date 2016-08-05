@@ -131,3 +131,14 @@ CONFIG["params"] = [
 ]
 ```
 
+
+#### Tests and publishing
+
+Every data source is code-reviewed by the Panoply.io team before being integrated to the system. In order to save time, make sure that:
+
+* You follow the best-practices and standard code conventions for the programming language used
+* Keep it slim. Avoid too many dependencies is possible, 
+* Test it throughly with unit-tests.
+* Notify the Panoply.io team of your data soruce, and we will integrate it promptly.
+
+
