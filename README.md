@@ -51,14 +51,14 @@ import panoply
 class MyDataSource(panoply.DataSource):
   def __init__(self, source, options):
     super(MyDataSource, self).__init__(source, options)
-    // and any initialization code you might need
+    # and any initialization code you might need
 
   def read(self, n = None):
-    // read up to n objects
+    # read up to n objects
     return [{hello:"world"}
     
   def close(self):
-    // if relevant - close/cleanup any resources used by the datasource
+    # if relevant - close/cleanup any resources used by the datasource
     pass
 ```
 
@@ -87,7 +87,7 @@ Writes a message to the log. It's advised to add log lines extensively in order 
 
 ###### progress(self, loaded, total, msg)
 
-Update the progress of the data source during calls to `read()`. It's used by the UI to show a progress bar, and for internal monitoring. You want to call `.progress()` atleast once per `read()` call. `loaded` and `total` are integers, representing the number of resources loaded out of the total number of resources. It can be anything, like db rows, files, API calls, etc. `msg` is a human-readable text describing the progress status, for example: `3,000/6,000 files loaded`.
+Update the progress of the data source during calls to `read()`. It's used by the UI to show a progress bar, and for internal monitoring. You want to call `.progress()` at least once per `read()` call. `loaded` and `total` are integers, representing the number of resources loaded out of the total number of resources. It can be anything, like db rows, files, API calls, etc. `msg` is a human-readable text describing the progress status, for example: `3,000/6,000 files loaded`.
 
 
 #### Configuration
@@ -136,9 +136,9 @@ CONFIG["params"] = [
 
 Every data source is code-reviewed by the Panoply.io team before being integrated to the system. In order to save time, make sure that:
 
-* You follow the best-practices and standard code conventions for the programming language used
-* Keep it slim. Avoid too many dependencies is possible, 
+* You follow the best-practices and standard code conventions for the programming language used.
+* Keep it slim. Avoid too many dependencies if possible.
 * Test it throughly with unit-tests.
-* Notify the Panoply.io team of your data soruce, and we will integrate it promptly.
+* Notify the Panoply.io team of your data source, and we will integrate it promptly.
 
 
