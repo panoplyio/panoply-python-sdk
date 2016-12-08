@@ -6,10 +6,7 @@ import threading
 import Queue
 import logging
 from copy import copy
-from __init__ import FLUSH_TIMEOUT
-from __init__ import MAXSIZE
-from __init__ import PKGNAME
-from __init__ import VERSION
+from constants import *
 
 import events
 
