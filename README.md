@@ -56,7 +56,7 @@ class MyDataSource(panoply.DataSource):
   def read(self, n = None):
     # read up to n objects
     return [{hello:"world"}
-    
+
   def close(self):
     # if relevant - close/cleanup any resources used by the datasource
     pass
@@ -139,6 +139,7 @@ Every data source is code-reviewed by the Panoply.io team before being integrate
 * You follow the best-practices and standard code conventions for the programming language used.
 * Keep it slim. Avoid too many dependencies if possible.
 * Test it throughly with unit-tests.
+* Add an annotated git tag with the version number (eg: v1.0.0) to the master branch locking the data source to a specific version.
 * Notify the Panoply.io team of your data source, and we will integrate it promptly.
 
 
