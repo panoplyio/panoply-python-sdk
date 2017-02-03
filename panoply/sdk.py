@@ -6,6 +6,7 @@ import threading
 import Queue
 import logging
 from copy import copy
+from constants import *
 
 import events
 
@@ -83,13 +84,13 @@ class SDK ( events.Emitter ):
         print "SENDING NOW"
 
         req = urllib2.Request( self.qurl, body, headers )
-        self.fire( "send", req )
+        self.fire( "send", {"req": req} )
         try:
             res = urllib2.urlopen( req )
         except Exception as err:
             self.fire( "error", err )
             return
-        self.fire( "flush", req, res )
+        self.fire( "flush", {"req": req, "res": res} )
 
     def _sendloop ( self ):
         buf = self._buffer
