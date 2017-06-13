@@ -1,8 +1,8 @@
 class Emitter(object):
     _events = None
 
-    def __init__(self):
-        self._events = {}
+    def __init__(self, events={}):
+        self._events = events
 
     def on(self, name, fn):
         self._events.setdefault(name, []).append(fn)
