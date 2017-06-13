@@ -53,7 +53,7 @@ def invalidate_token(refresh_url, callback=None):
                         data = dict(self.options['refresh'],
                                     refresh_token=token))
                     self.source['access_token'] = r.json()['access_token']
-                    
+
                     changes = {'access_token': self.source['access_token']}
                     self.fire("source-change", changes)
 
