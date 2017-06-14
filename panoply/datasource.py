@@ -49,7 +49,7 @@ def invalidate_token(refresh_url, callback=None,
                     self.source[keys[0]] = None
 
                     # get a new token from refresh_url
-                    token = self.source.get('refresh_token')
+                    token = self.source.get(keys[1])
                     r = requests.post(
                         refresh_url,
                         data = dict(self.options['refresh'], **{keys[1]:token}))
