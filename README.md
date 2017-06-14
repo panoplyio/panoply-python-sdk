@@ -73,7 +73,7 @@ The `events` parameter signs event handlers for this data source. It is a dictio
 
 `source` should have a `destination` key (String) describing the default table destination for data retrieved using the data source. The default destination is the type of the data source as will be defined by Panoply
 
-```
+```python
 def __init__(self, source, ...):
     ...
     if 'destination' not in source:
