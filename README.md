@@ -49,8 +49,8 @@ You first need to create a Python class that inherits from the SDK's `panoply.Da
 import panoply
 
 class MyDataSource(panoply.DataSource):
-  def __init__(self, source, options):
-    super(MyDataSource, self).__init__(source, options)
+  def __init__(self, *args, **kwargs):
+    super(MyDataSource, self).__init__(*args, **kwargs)
     # and any initialization code you might need
 
   def read(self, n = None):
@@ -64,17 +64,19 @@ class MyDataSource(panoply.DataSource):
 
 The `DataSource` base class exposes the following methods:
 
-###### __init__(self, source, options)
+###### __init__(self, source, options, events)
 
-Constructor. Receives a dictionary with the data `source` parameters (see below) and a dictionary with any additional `options`. Generally, it's safe to disregard the options, however it may be used for performance optimizations, as it contains hints about incremental keys, excluded fields, etc.
+Constructor. Receives a dictionary with the data `source` parameters (see below), a dictionary with any additional `options` and a dictionary with `events` subscriptions. Generally, it's safe to disregard the options, however it may be used for performance optimizations, as it contains hints about incremental keys, excluded fields, etc, and it may contain additional parameters that can't be transferred with the source
+The `events` parameter signs event handlers for this data source. It is a dictionary with its keys being the event type (or '*' for all), and its values being a list of functions to call when the event arrives.
 
-**Make sure** to call `super()` if you need to override it.
+
+**Make sure** to call `super()` with all the arguments if you need to override it.
 
 ###### read(self, n = None)
 
 Required abstract function. Reads up to `N` objects from the source. `N` is just a hint for the number of objects to return, but it can be disregarded if it's not relevant for your specific data source. This method should return either:
 
-* List of arbitrary objects (python dictionaries), preferrably in a large batch. For performance, it's advised to return a large amount of objects, as close as possible to N.
+* List of arbitrary objects (python dictionaries), preferably in a large batch. For performance, it's advised to return a large amount of objects, as close as possible to N.
 * `None`, to indicate an EOF when all of the available data has been read.
 
 ###### close(self)
@@ -87,7 +89,17 @@ Writes a message to the log. It's advised to add log lines extensively in order 
 
 ###### progress(self, loaded, total, msg)
 
-Update the progress of the data source during calls to `read()`. It's used by the UI to show a progress bar, and for internal monitoring. You want to call `.progress()` at least once per `read()` call. `loaded` and `total` are integers, representing the number of resources loaded out of the total number of resources. It can be anything, like db rows, files, API calls, etc. `msg` is a human-readable text describing the progress status, for example: `3,000/6,000 files loaded`.
+Update the progress of the data source during calls to `read()`. It's used by the UI to show a progress bar, and for internal monitoring. You want to call `.progress()` at least once per `read()` call. `loaded` and `total` are integers, representing the number of resources loaded out of the total number of resources. It can be anything, like db rows, files, API calls, etc. `msg` is an optional human-readable text describing the progress status, for example: `3,000/6,000 files loaded`. For the best user experience, it is advised to provide a clear and coherent message
+
+###### fire(self, type, data)
+
+Fire an event of type `type` with the specified data
+Each data source comes with a predefined 'source-change' event that can be fired to indicate that the source parameters have changed in order for the system to save the new parameters. The data in this case, is a dictionary of the changed parameters
+
+
+#### Exceptions
+
+Exceptions that arise from data sources are not handled by the system. However, if the exceptions were originated from the `read` method, the system will retry the action 3 times before giving up on the task. While this may usually be the required process, there are times when a retry is useless (e.g HTTP 404 from a service the data source uses). For this reason, the SDK exposes the exception `panoply.errors.PanoplyException` that includes a `retryable` boolean attribute specifying whether the system should retry or not.
 
 
 #### Configuration
@@ -141,5 +153,3 @@ Every data source is code-reviewed by the Panoply.io team before being integrate
 * Test it throughly with unit-tests.
 * Add an annotated git tag with the version number (eg: v1.0.0) to the master branch locking the data source to a specific version.
 * Notify the Panoply.io team of your data source, and we will integrate it promptly.
-
-
