@@ -93,7 +93,8 @@ Update the progress of the data source during calls to `read()`. It's used by th
 
 ###### fire(self, type, data)
 
-Fire an event of type `type` with the specified data
+Fire an event of type `type` with the specified data.
+
 Each data source comes with a predefined 'source-change' event that can be fired to indicate that the source parameters have changed in order for the system to save the new parameters. The data in this case, is a dictionary of the changed parameters
 
 
