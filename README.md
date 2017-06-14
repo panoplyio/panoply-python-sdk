@@ -155,6 +155,30 @@ CONFIG["params"] = [
 ]
 ```
 
+#### Decorators
+
+The SDK exposes some utilities to help with tasks that recur in many data sources:
+
+###### panoply.invalidate_token(refresh_url, callback, keys)
+
+The `invalidate_token` decorator may be used in data sources having OAuth2 authentication, that need to invalidate (refresh) the token. It should be placed before each method that might fail due to token validation problems. This decorator receives a `refresh_url` string indicating the URL to call in order to refresh the token, an optional `string` (in case it is a method of the data source) or `callable` `callback` to call upon receiving the new token (that will be passed as a parameter to the specified callback) and an optional `keys` sequence (either `tuple` or `list`) where the first item is a `string` indicating the access token key (default: 'access_token') and the second item is a `string` indicating the refresh token key (default: 'refresh_token')
+
+```python
+import panoply
+
+class Stream(panoply.DataSource):
+    @panoply.invalidate_token('https://oauth.provider/token/refresh', 'my_callback')
+    def read(self, n=None):
+        # call an authenticated process relying on the validity of the access token
+        ...
+
+    def my_callback(new_token):
+        # do something with the new_token
+        # there is no need to save it in the source or call the failing method against
+        # as those actions are already handled by the decorator
+        ...
+```
+
 
 #### Tests and publishing
 

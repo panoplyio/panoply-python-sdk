@@ -61,7 +61,10 @@ def invalidate_token(refresh_url, callback=None,
 
                     # notify the callback that a new token was issued
                     if callback:
-                        _callback = getattr(self, callback)
+                        if callable(callback):
+                            _callback = callback
+                        else:
+                            _callback = getattr(self, callback)
                         _callback(self.source.get(keys[0]))
 
                     return f(*args)
