@@ -69,6 +69,17 @@ The `DataSource` base class exposes the following methods:
 Constructor. Receives a dictionary with the data `source` parameters (see below), a dictionary with any additional `options` and a dictionary with `events` subscriptions. Generally, it's safe to disregard the options, however it may be used for performance optimizations, as it contains hints about incremental keys, excluded fields, etc, and it may contain additional parameters that can't be transferred with the source
 The `events` parameter signs event handlers for this data source. It is a dictionary with its keys being the event type (or '*' for all), and its values being a list of functions to call when the event arrives.
 
+`source` and `options` are available as attributes from within the class instance.
+
+`source` should have a `destination` key (String) describing the default table destination for data retrieved using the data source. The default destination is the type of the data source as will be defined by Panoply
+
+```
+def __init__(self, source, ...):
+    ...
+    if 'destination' not in source:
+        source['destination'] = source['type']
+```
+
 
 **Make sure** to call `super()` with all the arguments if you need to override it.
 
@@ -93,14 +104,14 @@ Update the progress of the data source during calls to `read()`. It's used by th
 
 ###### fire(self, type, data)
 
-Fire an event of type `type` with the specified data.
+Fire an event of type `type` with the specified `data`.
 
-Each data source comes with a predefined 'source-change' event that can be fired to indicate that the source parameters have changed in order for the system to save the new parameters. The data in this case, is a dictionary of the changed parameters
+Each data source comes with a predefined `source-change` event that can be fired to indicate that the source parameters have changed in order for the system to save the new parameters. The data in this case, is a dictionary of the changed parameters
 
 
 #### Exceptions
 
-Exceptions that arise from data sources are not handled by the system. However, if the exceptions were originated from the `read` method, the system will retry the action 3 times before giving up on the task. While this may usually be the required process, there are times when a retry is useless (e.g HTTP 404 from a service the data source uses). For this reason, the SDK exposes the exception `panoply.errors.PanoplyException` that includes a `retryable` boolean attribute specifying whether the system should retry or not.
+Exceptions that arise from data sources are not handled by the system. However, if the exceptions were originated from the `read` method, the system will retry the action 3 times before giving up on the task. While this may usually be the required process, there are times when a retry will not yield a different result (e.g HTTP 404 from a service the data source uses). For this reason, the SDK exposes the exception `panoply.errors.PanoplyException` that includes a `retryable` boolean attribute specifying whether the system should retry or not.
 
 
 #### Configuration
