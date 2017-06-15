@@ -134,7 +134,7 @@ A dictionary with configuration details for the data source.
 CONFIG = {
   "title": "My Data Source", # human-readable title
   "icon": "data:image/png;base64,iVBORw...", # a data-url icon to show in the UI
-  "params": {} # see below
+  "params": [] # see below
 }
 ```
 
