@@ -14,7 +14,7 @@ class DataSource(events.Emitter):
         super(DataSource, self).__init__(events)
 
         if 'destination' not in source:
-            source['destination'] = source['type']
+            source['destination'] = source.get('type')
 
         self.source = source
         self.options = options
