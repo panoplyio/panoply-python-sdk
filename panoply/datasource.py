@@ -43,7 +43,7 @@ def invalidate_token(refresh_url, callback=None,
             self = args[0]
             try:
                 return f(*args)
-            except:
+            except Exception, e:
                 try:
                     self.log("Reinvalidating access_token...")
                     self.source[keys[0]] = None
@@ -70,12 +70,12 @@ def invalidate_token(refresh_url, callback=None,
                     return f(*args)
                 except:
                     # make sure the real exception is logged
-                    self.log(traceback.format_exc())
+                    self.log(e, traceback.format_exc())
                     self.log("Error: Access token can't be invalidated." +
                           " The user would have to re-authenticate")
                     # raise a non-retryable exception
                     raise PanoplyException(
-                        'access token could not be refreshed',
-                        retryable=False)
+                        'access token could not be refreshed ({})'
+                        .format(str(e)), retryable=False)
         return wrapper
     return _invalidate_token
