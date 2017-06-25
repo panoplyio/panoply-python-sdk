@@ -13,11 +13,11 @@ class DataSource(events.Emitter):
     def __init__(self, source, options = {}, events = {}):
         super(DataSource, self).__init__(events)
 
-        if 'destination' not in source:
-            source['destination'] = source.get('type')
-
-        self.source = source
+        self.source = dict(source)
         self.options = options
+
+        if 'destination' not in source:
+            self.source['destination'] = source.get('type')
 
     # log a message
     def log(self, *msgs):
