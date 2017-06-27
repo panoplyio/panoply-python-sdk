@@ -7,7 +7,7 @@ branches:
    - master
 
 install:
-    - pip install
+    - pip install -e .[test]
 
 # Each step below must succeed for the build to pass
 script:
