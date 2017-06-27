@@ -35,9 +35,28 @@ class DataSource(events.Emitter):
 
 def invalidate_token(refresh_url, callback=None,
                      access_key='access_token', refresh_key='refresh_token'):
-    ''' a decorator used to invalidate the access_token for oauth based data sources
-    this should be used on every method in the data source that fetches data
-    from the server (controlled by this oauth), and that needs to be invalidated
+    ''' a decorator used to invalidate the access_token for oauth based
+    data sources.
+    This decorator should be used on every method in the data source that
+    fetches data from the oauth controlled resource, and that relies on a
+    valid access_token in order to operate properly
+
+    Parameters
+    ----------
+    refresh_url : str
+        The URL to be called in order to refresh the access token.
+    callback : callable
+        A callback function to be called whenever the access_token is
+        invalidated. The callback function would be called with the refreshed
+        token as an argument
+    access_key : str
+        The access token key as defined in the source and in the response from
+        the refresh URL.
+        Defaults to `access_token`
+    refresh_key : str
+        The refresh token key as defined in the source and in the request to
+        the refresh URL.
+        Defaults to `refresh_token`
     '''
     def _invalidate_token(f):
         def wrapper(*args):
@@ -53,8 +72,8 @@ def invalidate_token(refresh_url, callback=None,
                     token = self.source.get(refresh_key)
                     r = requests.post(
                         refresh_url,
-                        data = dict(self.options['refresh'],
-                                    **{refresh_key: token}))
+                        data=dict(self.options['refresh'],
+                                  **{refresh_key: token}))
                     self.source[access_key] = r.json()[access_key]
 
                     # save the new token in the database
