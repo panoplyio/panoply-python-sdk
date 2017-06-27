@@ -34,7 +34,7 @@ class DataSource(events.Emitter):
 
 
 def invalidate_token(refresh_url, callback=None,
-                     access_key='access_token', refresh_key='refresh_token')):
+                     access_key='access_token', refresh_key='refresh_token'):
     ''' a decorator used to invalidate the access_token for oauth based data sources
     this should be used on every method in the data source that fetches data
     from the server (controlled by this oauth), and that needs to be invalidated

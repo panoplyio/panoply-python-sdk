@@ -93,7 +93,7 @@ class SDK (events.Emitter):
             return
         self.fire("flush", {"req": req, "res": res})
 
-    def _sendloop ( self ):
+    def _sendloop (self):
         buf = self._buffer
         body = ""
         lastsend = time.time()
