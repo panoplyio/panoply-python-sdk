@@ -6,7 +6,7 @@ import threading
 import Queue
 import logging
 from copy import copy
-from constants import *
+from ..constants import *
 
 import events
 
@@ -39,11 +39,11 @@ class SDK ( events.Emitter ):
 
         # construct the queue url
         # queue: sdk-ACCOUNT-RAND2
-        self.qurl = "https://sqs.%s.amazonaws.com/%s/sdk-%s-%s" % ( 
-            region, 
-            awsaccount, 
-            account, 
-            rand 
+        self.qurl = "https://sqs.%s.amazonaws.com/%s/sdk-%s-%s" % (
+            region,
+            awsaccount,
+            account,
+            rand
         )
 
         self._buffer = Queue.Queue()
@@ -76,7 +76,7 @@ class SDK ( events.Emitter ):
         ]
 
         body = "&".join( body )
-        
+
         headers = {
             "Content-Length": len( body ),
             "Content-Type": "application/x-www-form-urlencoded"
@@ -117,4 +117,3 @@ class SDK ( events.Emitter ):
 
             if data:
                 buf.task_done()
-
