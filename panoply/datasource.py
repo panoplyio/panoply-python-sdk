@@ -32,7 +32,6 @@ class DataSource(events.Emitter):
         })
 
 
-
 def invalidate_token(refresh_url, callback=None,
                      access_key='access_token', refresh_key='refresh_token'):
     ''' a decorator used to invalidate the access_token for oauth based
