@@ -6,7 +6,7 @@ import threading
 import Queue
 import logging
 from copy import copy
-from ..constants import *
+from constants import *
 
 import events
 
