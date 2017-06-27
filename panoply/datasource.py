@@ -3,6 +3,7 @@ import requests
 from errors import PanoplyException
 import traceback
 
+
 # abstract DataSource object
 class DataSource(events.Emitter):
 
@@ -10,7 +11,7 @@ class DataSource(events.Emitter):
     options = None
 
     # data source constructor
-    def __init__(self, source, options = {}, events = {}):
+    def __init__(self, source, options={}, events={}):
         super(DataSource, self).__init__(events)
 
         self.source = source
@@ -30,11 +31,14 @@ class DataSource(events.Emitter):
             "msg": msg
         })
 
-# a decorator used to invalidate the access_token for oauth based data sources
-# this should be used on every method in the data source that fetches data
-# from the server (controlled by this oauth), and that needs to be invalidated
+
+
 def invalidate_token(refresh_url, callback=None,
-                     keys=['access_token', 'refresh_token']):
+                     access_key='access_token', refresh_key='refresh_token')):
+    ''' a decorator used to invalidate the access_token for oauth based data sources
+    this should be used on every method in the data source that fetches data
+    from the server (controlled by this oauth), and that needs to be invalidated
+    '''
     def _invalidate_token(f):
         def wrapper(*args):
             self = args[0]
@@ -43,17 +47,18 @@ def invalidate_token(refresh_url, callback=None,
             except Exception, e:
                 try:
                     self.log("Reinvalidating access_token...")
-                    self.source[keys[0]] = None
+                    self.source[access_key] = None
 
                     # get a new token from refresh_url
-                    token = self.source.get(keys[1])
+                    token = self.source.get(refresh_key)
                     r = requests.post(
                         refresh_url,
-                        data = dict(self.options['refresh'], **{keys[1]:token}))
-                    self.source[keys[0]] = r.json()[keys[0]]
+                        data = dict(self.options['refresh'],
+                                    **{refresh_key: token}))
+                    self.source[access_key] = r.json()[access_key]
 
                     # save the new token in the database
-                    changes = {keys[0]: self.source[keys[0]]}
+                    changes = {access_key: self.source[access_key]}
                     self.fire("source-change", changes)
 
                     # notify the callback that a new token was issued
@@ -62,14 +67,14 @@ def invalidate_token(refresh_url, callback=None,
                             _callback = callback
                         else:
                             _callback = getattr(self, callback)
-                        _callback(self.source.get(keys[0]))
+                        _callback(self.source.get(access_key))
 
                     return f(*args)
                 except:
                     # make sure the real exception is logged
                     self.log(e, traceback.format_exc())
-                    self.log("Error: Access token can't be invalidated." +
-                          " The user would have to re-authenticate")
+                    self.log("Error: Access token can't be invalidated."
+                             " The user would have to re-authenticate")
                     # raise a non-retryable exception
                     raise PanoplyException(
                         'access token could not be refreshed ({})'
