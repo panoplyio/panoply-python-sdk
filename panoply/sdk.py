@@ -10,8 +10,11 @@ from constants import *
 
 import events
 
+MAXSIZE = 1024 * 250  # 250kib
+FLUSH_TIMEOUT = 2.0   # 2 seconds
 
-class SDK (events.Emitter):
+
+class SDK(events.Emitter):
 
     account = None
     apikey = None

@@ -66,12 +66,13 @@ The `DataSource` base class exposes the following methods:
 
 ###### __init__(self, source, options, events)
 
-Constructor. Receives a dictionary with the data `source` parameters (see below), a dictionary with any additional `options` and a dictionary with `events` subscriptions. Generally, it's safe to disregard the options, however it may be used for performance optimizations, as it contains hints about incremental keys, excluded fields, etc, and it may contain additional parameters that can't be transferred with the source
-The `events` parameter signs event handlers for this data source. It is a dictionary with its keys being the event type (or '*' for all), and its values being a list of functions to call when the event arrives.
+Constructor. Receives a dictionary with the data `source` parameters (see below), a dictionary with any additional `options` and a dictionary with `events` subscriptions. Generally, it's safe to disregard the options, however it may be used for performance optimizations, as it contains hints about incremental keys, excluded fields, etc. It may also contain additional parameters that can't be transferred with the source (e.g. secret keys)
+The `events` parameter signs event handlers for this data source. It is a dictionary with its keys being the event type (or '*' for all), and its values being a list of callables to call when the event is triggered.
+
 
 `source` and `options` are available as attributes from within the class instance.
 
-`source` should have a `destination` key (String) describing the default table destination for data retrieved using the data source. The default destination is the type of the data source as will be defined by Panoply
+`source` should have a `destination` key (String) pertaining to the destination table name. Data retrieved using the data source will be saved in a table having that name.
 
 ```python
 def __init__(self, source, ...):
@@ -100,13 +101,13 @@ Writes a message to the log. It's advised to add log lines extensively in order 
 
 ###### progress(self, loaded, total, msg)
 
-Update the progress of the data source during calls to `read()`. It's used by the UI to show a progress bar, and for internal monitoring. You want to call `.progress()` at least once per `read()` call. `loaded` and `total` are integers, representing the number of resources loaded out of the total number of resources. It can be anything, like db rows, files, API calls, etc. `msg` is an optional human-readable text describing the progress status, for example: `3,000/6,000 files loaded`. For the best user experience, it is advised to provide a clear and coherent message
+Update the progress of the data source during calls to `read()`. It's used by the UI to show a progress bar, and for internal monitoring. You want to call `.progress()` at least once per `read()` call. `loaded` and `total` are integers, representing the number of resources loaded out of the total number of resources. It can be anything, like db rows, files, API calls, etc. `msg` is an optional human-readable text describing the progress status, for example: `3,000/6,000 files loaded`. For the best user experience, it is advised to provide a clear and coherent message.
 
 ###### fire(self, type, data)
 
 Fire an event of type `type` with the specified `data`.
 
-Each data source comes with a predefined `source-change` event that can be fired to indicate that the source parameters have changed in order for the system to save the new parameters. The data in this case, is a dictionary of the changed parameters
+Each data source comes with a predefined `source-change` event that can be fired to indicate that the source parameters have changed in order for the system to save the new parameters. The data in this case, is a dictionary of the changed parameters.
 
 
 #### Exceptions
@@ -159,22 +160,22 @@ CONFIG["params"] = [
 
 The SDK exposes some utilities to help with tasks that recur in many data sources:
 
-###### panoply.invalidate_token(refresh_url, callback, keys)
+###### panoply.validate_token(refresh_url, callback=None, access_key='access_token', refresh_key='refresh_token')
 
-The `invalidate_token` decorator may be used in data sources having OAuth2 authentication, that need to invalidate (refresh) the token. It should be placed before each method that might fail due to token validation problems. This decorator receives a `refresh_url` string indicating the URL to call in order to refresh the token, an optional `string` (in case it is a method of the data source) or `callable` `callback` to call upon receiving the new token (that will be passed as a parameter to the specified callback) and an optional `keys` sequence (either `tuple` or `list`) where the first item is a `string` indicating the access token key (default: 'access_token') and the second item is a `string` indicating the refresh token key (default: 'refresh_token')
+The `validate_token` decorator may be used in data sources having OAuth2 authentication, that need to validate (refresh) the token. It should be placed before each method that might fail due to token validation problems. This decorator receives a `refresh_url` string indicating the URL to call in order to refresh the token, an optional `string` (in case it is a method of the data source) or `callable` `callback` to call upon receiving the new token (that will be passed as a parameter to the specified callback), an optional `access_key` string indicating the access token key (default: 'access_token') and an optional 'refresh_key' string indicating the refresh token key (default: 'refresh_token')
 
 ```python
 import panoply
 
 class Stream(panoply.DataSource):
-    @panoply.invalidate_token('https://oauth.provider/token/refresh', 'my_callback')
+    @panoply.validate_token('https://oauth.provider/token/refresh', 'my_callback')
     def read(self, n=None):
         # call an authenticated process relying on the validity of the access token
         ...
 
     def my_callback(new_token):
         # do something with the new_token
-        # there is no need to save it in the source or call the failing method against
+        # there is no need to save it in the source or call the failing method again
         # as those actions are already handled by the decorator
         ...
 ```
