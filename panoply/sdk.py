@@ -6,7 +6,7 @@ import threading
 import Queue
 import logging
 from copy import copy
-from constants import *
+from constants import __package_name__, __version__
 
 import events
 

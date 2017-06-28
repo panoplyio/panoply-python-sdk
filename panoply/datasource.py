@@ -19,20 +19,20 @@ class DataSource(events.Emitter):
 
     # log a message
     def log(self, *msgs):
-        if "logger" in self.options:
-            self.options["logger"](msgs)
+        if 'logger' in self.options:
+            self.options['logger'](msgs)
         else:
             print(msgs)
 
     def progress(self, loaded, total, msg=''):
-        self.fire("progress", {
-            "loaded": loaded,
-            "total": total,
-            "msg": msg
+        self.fire('progress', {
+            'loaded': loaded,
+            'total': total,
+            'msg': msg
         })
 
 
-def validate_token(refresh_url, callback=None,
+def validate_token(refresh_url, callback=None, exceptions=(Exception),
                    access_key='access_token', refresh_key='refresh_token'):
     ''' a decorator used to validate the access_token for oauth based
     data sources.
@@ -40,10 +40,15 @@ def validate_token(refresh_url, callback=None,
     fetches data from the oauth controlled resource, and that relies on a
     valid access_token in order to operate properly.
     If the token is valid, the normal flow continues without any change.
-    Otherwise, the normal flow will be preceded by the following steps:
+    Otherwise, if any of `exceptions` tuple is raised, the normal flow
+    will be preceded by the following steps:
+
     1. `refresh_url` will be called in order to refresh the token
     2. the newly refreshed token will be saved in the source
     3. the `callback` function will be called
+
+    If the refresh fails for any reason, the user would have to re-grant
+    permission for the application
 
     Parameters
     ----------
@@ -56,6 +61,10 @@ def validate_token(refresh_url, callback=None,
         If the `callback` is not `callable`, but an `str` it will be called
         on `self` (i.e. call a method on your Data Source)
         Defaults to None
+    exceptions : tuple
+        A list of exceptions that should cause token invalidation
+        Defaults to Exception, meaning that all errors will cause token
+        refresh
     access_key : str
         The access token key as defined in the source and in the response from
         the refresh URL.
@@ -70,9 +79,9 @@ def validate_token(refresh_url, callback=None,
             self = args[0]
             try:
                 return f(*args)
-            except Exception, e:
+            except exceptions:
                 try:
-                    self.log("Revalidating the access token...")
+                    self.log('Revalidating the access token...')
                     self.source[access_key] = None
 
                     # get a new token from refresh_url
@@ -84,7 +93,7 @@ def validate_token(refresh_url, callback=None,
 
                     # save the new token in the database
                     changes = {access_key: self.source[access_key]}
-                    self.fire("source-change", changes)
+                    self.fire('source-change', changes)
 
                     # notify the callback that a new token was issued
                     if callback:
@@ -95,11 +104,9 @@ def validate_token(refresh_url, callback=None,
                         _callback(self.source.get(access_key))
 
                     return f(*args)
-                except:
-                    # make sure the real exception is logged
-                    self.log(e, traceback.format_exc())
-                    self.log("Error: Access token can't be invalidated."
-                             " The user would have to re-authenticate")
+                except Exception, e:
+                    self.log('Error: Access token can\'t be invalidated. '
+                             'The user would have to re-authenticate', e)
                     # raise a non-retryable exception
                     raise PanoplyException(
                         'access token could not be refreshed ({})'
