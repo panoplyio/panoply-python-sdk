@@ -1,9 +1,11 @@
 from distutils.core import setup
-from constants import VERSION, PKGNAME
+
+execfile('panoply/constants.py')
+
 
 setup(
-    name=PKGNAME,
-    version=VERSION,
+    name=__package_name__,
+    version=__version__,
     packages=["panoply"],
     install_requires=[
         "requests==2.3.0",

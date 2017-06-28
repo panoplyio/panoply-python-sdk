@@ -65,6 +65,7 @@ class SDK(events.Emitter):
 
     # flush the buffer to SQS
     def _send(self, body):
+        pack = __package_name__ + "-" + __version__
         body = [
             "Action=SendMessage",
             "MessageBody=" + body,
@@ -76,7 +77,7 @@ class SDK(events.Emitter):
             "MessageAttribute.2.Value.StringValue=" + self.apisecret,
             "MessageAttribute.3.Name=sdk",
             "MessageAttribute.3.Value.DataType=String",
-            "MessageAttribute.3.Value.StringValue=" + PKGNAME + "-" + VERSION,
+            "MessageAttribute.3.Value.StringValue=" + pack,
         ]
 
         body = "&".join(body)
