@@ -32,22 +32,30 @@ class DataSource(events.Emitter):
         })
 
 
-def invalidate_token(refresh_url, callback=None,
-                     access_key='access_token', refresh_key='refresh_token'):
-    ''' a decorator used to invalidate the access_token for oauth based
+def validate_token(refresh_url, callback=None,
+                   access_key='access_token', refresh_key='refresh_token'):
+    ''' a decorator used to validate the access_token for oauth based
     data sources.
     This decorator should be used on every method in the data source that
     fetches data from the oauth controlled resource, and that relies on a
-    valid access_token in order to operate properly
+    valid access_token in order to operate properly.
+    If the token is valid, the normal flow continues without any change.
+    Otherwise, the normal flow will be preceded by the following steps:
+    1. `refresh_url` will be called in order to refresh the token
+    2. the newly refreshed token will be saved in the source
+    3. the `callback` function will be called
 
     Parameters
     ----------
     refresh_url : str
         The URL to be called in order to refresh the access token.
-    callback : callable
+    callback : str or callable
         A callback function to be called whenever the access_token is
-        invalidated. The callback function would be called with the refreshed
-        token as an argument
+        validated. The callback function would be called with the refreshed
+        token as an argument.
+        If the `callback` is not `callable`, but an `str` it will be called
+        on `self` (i.e. call a method on your Data Source)
+        Defaults to None
     access_key : str
         The access token key as defined in the source and in the response from
         the refresh URL.
@@ -57,22 +65,21 @@ def invalidate_token(refresh_url, callback=None,
         the refresh URL.
         Defaults to `refresh_token`
     '''
-    def _invalidate_token(f):
+    def _validate_token(f):
         def wrapper(*args):
             self = args[0]
             try:
                 return f(*args)
             except Exception, e:
                 try:
-                    self.log("Reinvalidating access_token...")
+                    self.log("Revalidating the access token...")
                     self.source[access_key] = None
 
                     # get a new token from refresh_url
                     token = self.source.get(refresh_key)
-                    r = requests.post(
-                        refresh_url,
-                        data=dict(self.options['refresh'],
-                                  **{refresh_key: token}))
+                    data = dict(self.options['refresh'],
+                                **{refresh_key: token})
+                    r = requests.post(refresh_url, data=data)
                     self.source[access_key] = r.json()[access_key]
 
                     # save the new token in the database
@@ -98,4 +105,4 @@ def invalidate_token(refresh_url, callback=None,
                         'access token could not be refreshed ({})'
                         .format(str(e)), retryable=False)
         return wrapper
-    return _invalidate_token
+    return _validate_token
