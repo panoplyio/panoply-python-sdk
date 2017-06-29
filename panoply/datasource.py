@@ -106,7 +106,8 @@ def validate_token(refresh_url, callback=None, exceptions=(Exception),
                     return f(*args)
                 except Exception, e:
                     self.log('Error: Access token can\'t be invalidated. '
-                             'The user would have to re-authenticate', e)
+                             'The user would have to re-authenticate',
+                             traceback.format_exc())
                     # raise a non-retryable exception
                     raise PanoplyException(
                         'access token could not be refreshed ({})'
