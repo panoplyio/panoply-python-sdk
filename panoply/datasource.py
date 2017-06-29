@@ -11,8 +11,8 @@ class DataSource(events.Emitter):
     options = None
 
     # data source constructor
-    def __init__(self, source, options={}, events={}):
-        super(DataSource, self).__init__(events)
+    def __init__(self, source, options={}):
+        super(DataSource, self).__init__()
 
         self.source = source
         self.options = options
@@ -32,7 +32,7 @@ class DataSource(events.Emitter):
         })
 
 
-def validate_token(refresh_url, callback=None, exceptions=(Exception),
+def validate_token(refresh_url, exceptions=(), callback=None,
                    access_key='access_token', refresh_key='refresh_token'):
     ''' a decorator used to validate the access_token for oauth based
     data sources.

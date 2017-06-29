@@ -49,8 +49,8 @@ You first need to create a Python class that inherits from the SDK's `panoply.Da
 import panoply
 
 class MyDataSource(panoply.DataSource):
-  def __init__(self, *args, **kwargs):
-    super(MyDataSource, self).__init__(*args, **kwargs)
+  def __init__(self, source, options, *args, **kwargs):
+    super(MyDataSource, self).__init__(source, options, *args, **kwargs)
     # and any initialization code you might need
 
   def read(self, n = None):
@@ -64,10 +64,9 @@ class MyDataSource(panoply.DataSource):
 
 The `DataSource` base class exposes the following methods:
 
-###### __init__(self, source, options, events)
+###### __init__(self, source, options)
 
-Constructor. Receives a dictionary with the data `source` parameters (see below), a dictionary with any additional `options` and a dictionary with `events` subscriptions. Generally, it's safe to disregard the options, however it may be used for performance optimizations, as it contains hints about incremental keys, excluded fields, etc. It may also contain additional parameters that can't be transferred with the source (e.g. secret keys)
-The `events` parameter signs event handlers for this data source. It is a dictionary with its keys being the event type (or '*' for all), and its values being a list of callables to call when the event is triggered.
+Constructor. Receives a dictionary with the data `source` parameters (see below) and a dictionary with any additional `options`. Generally, it's safe to disregard the options, however it may be used for performance optimizations, as it contains hints about incremental keys, excluded fields, etc. It may also contain additional parameters that can't be transferred with the source (e.g. secret keys)
 
 
 `source` and `options` are available as attributes from within the class instance.
@@ -75,7 +74,7 @@ The `events` parameter signs event handlers for this data source. It is a dictio
 `source` should have a `destination` key (String) pertaining to the destination table name. Data retrieved using the data source will be saved in a table having that name.
 
 ```python
-def __init__(self, source, ...):
+def __init__(self, source, options):
     ...
     if 'destination' not in source:
         source['destination'] = source['type']
@@ -160,15 +159,15 @@ CONFIG["params"] = [
 
 The SDK exposes some utilities to help with tasks that recur in many data sources:
 
-###### panoply.validate_token(refresh_url, callback=None, access_key='access_token', refresh_key='refresh_token')
+###### panoply.validate_token(refresh_url, exceptions, callback=None, access_key='access_token', refresh_key='refresh_token')
 
-The `validate_token` decorator may be used in data sources having OAuth2 authentication, that need to validate (refresh) the token. It should be placed before each method that might fail due to token validation problems. This decorator receives a `refresh_url` string indicating the URL to call in order to refresh the token, an optional `string` (in case it is a method of the data source) or `callable` `callback` to call upon receiving the new token (that will be passed as a parameter to the specified callback), an optional `access_key` string indicating the access token key (default: 'access_token') and an optional 'refresh_key' string indicating the refresh token key (default: 'refresh_token')
+The `validate_token` decorator may be used in data sources having OAuth2 authentication, that need to validate (refresh) the token. It should be placed before each method that might fail due to token validation problems. This decorator receives a `refresh_url` string indicating the URL to call in order to refresh the token, an `exceptions` tuple (or single exception) that indicate the exceptions that should be caught in order to refresh the token, `callback` which is an optional `string` (in case it is a method of the data source) or `callable` to call upon receiving the new token (that will be passed as a parameter to the specified callback), an optional `access_key` string indicating the access token key (default: 'access_token') and an optional 'refresh_key' string indicating the refresh token key (default: 'refresh_token')
 
 ```python
 import panoply
 
 class Stream(panoply.DataSource):
-    @panoply.validate_token('https://oauth.provider/token/refresh', 'my_callback')
+    @panoply.validate_token('https://oauth.provider/token/refresh', HttpError, 'my_callback')
     def read(self, n=None):
         # call an authenticated process relying on the validity of the access token
         ...
