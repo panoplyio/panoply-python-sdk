@@ -66,7 +66,7 @@ The `DataSource` base class exposes the following methods:
 
 ###### __init__(self, source, options)
 
-Constructor. Receives a dictionary with the data `source` parameters (see below) and a dictionary with any additional `options`. Generally, it's safe to disregard the options, however it may be used for performance optimizations, as it contains hints about incremental keys, excluded fields, etc. It may also contain additional parameters that can't be transferred with the source (e.g. secret keys)
+Constructor. Receives a dictionary with the data `source` parameters (see below) and a dictionary with any additional `options`. Generally, it's safe to disregard the options, however it may be used for performance optimizations, as it contains hints about incremental keys, excluded fields, etc. It may also contain additional parameters that can't be transferred with the source (e.g. secret keys).
 
 
 `source` and `options` are available as attributes from within the class instance.
@@ -161,7 +161,7 @@ The SDK exposes some utilities to help with tasks that recur in many data source
 
 ###### panoply.validate_token(refresh_url, exceptions, callback=None, access_key='access_token', refresh_key='refresh_token')
 
-The `validate_token` decorator may be used in data sources having OAuth2 authentication, that need to validate (refresh) the token. It should be placed before each method that might fail due to token validation problems. This decorator receives a `refresh_url` string indicating the URL to call in order to refresh the token, an `exceptions` tuple (or single exception) that indicate the exceptions that should be caught in order to refresh the token, `callback` which is an optional `string` (in case it is a method of the data source) or `callable` to call upon receiving the new token (that will be passed as a parameter to the specified callback), an optional `access_key` string indicating the access token key (default: 'access_token') and an optional 'refresh_key' string indicating the refresh token key (default: 'refresh_token')
+The `validate_token` decorator may be used in data sources having OAuth2 authentication, that need to validate (refresh) the token. It should be placed before each method that might fail due to token validation problems. This decorator receives a `refresh_url` string indicating the URL to call in order to refresh the token, an `exceptions` tuple (or single exception) that indicate the exceptions that should be caught in order to refresh the token, `callback` which is an optional `string` (in case it is a method of the data source) or `callable` to call upon receiving the new token (that will be passed as a parameter to the specified callback), an optional `access_key` string indicating the access token key (default: 'access_token') and an optional 'refresh_key' string indicating the refresh token key (default: 'refresh_token').
 
 ```python
 import panoply

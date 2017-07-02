@@ -62,7 +62,7 @@ def validate_token(refresh_url, exceptions=(), callback=None,
         on `self` (i.e. call a method on your Data Source)
         Defaults to None
     exceptions : tuple
-        A list of exceptions that should cause token invalidation
+        A list of exceptions that should cause token revalidation
         Defaults to Exception, meaning that all errors will cause token
         refresh
     access_key : str
@@ -105,7 +105,7 @@ def validate_token(refresh_url, exceptions=(), callback=None,
 
                     return f(*args)
                 except Exception, e:
-                    self.log('Error: Access token can\'t be invalidated. '
+                    self.log('Error: Access token can\'t be revalidated. '
                              'The user would have to re-authenticate',
                              traceback.format_exc())
                     # raise a non-retryable exception
