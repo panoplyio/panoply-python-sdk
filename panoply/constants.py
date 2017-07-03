@@ -1,4 +1,2 @@
-VERSION = "1.3.3"
-PKGNAME = "panoply-python-sdk"
-MAXSIZE = 1024 * 250 # 250kib
-FLUSH_TIMEOUT = 2.0 # 2 seconds
+__version__ = "1.3.4"
+__package_name__ = "panoply-python-sdk"

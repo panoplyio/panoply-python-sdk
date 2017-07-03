@@ -49,8 +49,8 @@ You first need to create a Python class that inherits from the SDK's `panoply.Da
 import panoply
 
 class MyDataSource(panoply.DataSource):
-  def __init__(self, source, options):
-    super(MyDataSource, self).__init__(source, options)
+  def __init__(self, source, options, *args, **kwargs):
+    super(MyDataSource, self).__init__(source, options, *args, **kwargs)
     # and any initialization code you might need
 
   def read(self, n = None):
@@ -66,15 +66,28 @@ The `DataSource` base class exposes the following methods:
 
 ###### __init__(self, source, options)
 
-Constructor. Receives a dictionary with the data `source` parameters (see below) and a dictionary with any additional `options`. Generally, it's safe to disregard the options, however it may be used for performance optimizations, as it contains hints about incremental keys, excluded fields, etc.
+Constructor. Receives a dictionary with the data `source` parameters (see below) and a dictionary with any additional `options`. Generally, it's safe to disregard the options, however it may be used for performance optimizations, as it contains hints about incremental keys, excluded fields, etc. It may also contain additional parameters that can't be transferred with the source (e.g. secret keys).
 
-**Make sure** to call `super()` if you need to override it.
+
+`source` and `options` are available as attributes from within the class instance.
+
+`source` should have a `destination` key (String) pertaining to the destination table name. Data retrieved using the data source will be saved in a table having that name.
+
+```python
+def __init__(self, source, options):
+    ...
+    if 'destination' not in source:
+        source['destination'] = source['type']
+```
+
+
+**Make sure** to call `super()` with all the arguments if you need to override it.
 
 ###### read(self, n = None)
 
 Required abstract function. Reads up to `N` objects from the source. `N` is just a hint for the number of objects to return, but it can be disregarded if it's not relevant for your specific data source. This method should return either:
 
-* List of arbitrary objects (python dictionaries), preferrably in a large batch. For performance, it's advised to return a large amount of objects, as close as possible to N.
+* List of arbitrary objects (python dictionaries), preferably in a large batch. For performance, it's advised to return a large amount of objects, as close as possible to N.
 * `None`, to indicate an EOF when all of the available data has been read.
 
 ###### close(self)
@@ -87,7 +100,18 @@ Writes a message to the log. It's advised to add log lines extensively in order 
 
 ###### progress(self, loaded, total, msg)
 
-Update the progress of the data source during calls to `read()`. It's used by the UI to show a progress bar, and for internal monitoring. You want to call `.progress()` at least once per `read()` call. `loaded` and `total` are integers, representing the number of resources loaded out of the total number of resources. It can be anything, like db rows, files, API calls, etc. `msg` is a human-readable text describing the progress status, for example: `3,000/6,000 files loaded`.
+Update the progress of the data source during calls to `read()`. It's used by the UI to show a progress bar, and for internal monitoring. You want to call `.progress()` at least once per `read()` call. `loaded` and `total` are integers, representing the number of resources loaded out of the total number of resources. It can be anything, like db rows, files, API calls, etc. `msg` is an optional human-readable text describing the progress status, for example: `3,000/6,000 files loaded`. For the best user experience, it is advised to provide a clear and coherent message.
+
+###### fire(self, type, data)
+
+Fire an event of type `type` with the specified `data`.
+
+Each data source comes with a predefined `source-change` event that can be fired to indicate that the source parameters have changed in order for the system to save the new parameters. The data in this case, is a dictionary of the changed parameters.
+
+
+#### Exceptions
+
+Exceptions that arise from data sources are not handled by the system. However, if the exceptions were originated from the `read` method, the system will retry the action 3 times before giving up on the task. While this may usually be the required process, there are times when a retry will not yield a different result (e.g HTTP 404 from a service the data source uses). For this reason, the SDK exposes the exception `panoply.errors.PanoplyException` that includes a `retryable` boolean attribute specifying whether the system should retry or not.
 
 
 #### Configuration
@@ -110,7 +134,7 @@ A dictionary with configuration details for the data source.
 CONFIG = {
   "title": "My Data Source", # human-readable title
   "icon": "data:image/png;base64,iVBORw...", # a data-url icon to show in the UI
-  "params": {} # see below
+  "params": [] # see below
 }
 ```
 
@@ -131,6 +155,30 @@ CONFIG["params"] = [
 ]
 ```
 
+#### Decorators
+
+The SDK exposes some utilities to help with tasks that recur in many data sources:
+
+###### panoply.validate_token(refresh_url, exceptions, callback=None, access_key='access_token', refresh_key='refresh_token')
+
+The `validate_token` decorator may be used in data sources having OAuth2 authentication, that need to validate (refresh) the token. It should be placed before each method that might fail due to token validation problems. This decorator receives a `refresh_url` string indicating the URL to call in order to refresh the token, an `exceptions` tuple (or single exception) that indicate the exceptions that should be caught in order to refresh the token, `callback` which is an optional `string` (in case it is a method of the data source) or `callable` to call upon receiving the new token (that will be passed as a parameter to the specified callback), an optional `access_key` string indicating the access token key (default: 'access_token') and an optional 'refresh_key' string indicating the refresh token key (default: 'refresh_token').
+
+```python
+import panoply
+
+class Stream(panoply.DataSource):
+    @panoply.validate_token('https://oauth.provider/token/refresh', HttpError, 'my_callback')
+    def read(self, n=None):
+        # call an authenticated process relying on the validity of the access token
+        ...
+
+    def my_callback(new_token):
+        # do something with the new_token
+        # there is no need to save it in the source or call the failing method again
+        # as those actions are already handled by the decorator
+        ...
+```
+
 
 #### Tests and publishing
 
@@ -141,5 +189,3 @@ Every data source is code-reviewed by the Panoply.io team before being integrate
 * Test it throughly with unit-tests.
 * Add an annotated git tag with the version number (eg: v1.0.0) to the master branch locking the data source to a specific version.
 * Notify the Panoply.io team of your data source, and we will integrate it promptly.
-
-
