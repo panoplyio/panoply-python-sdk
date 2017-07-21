@@ -6,6 +6,7 @@ SQS-based Python SDK for streaming data in realtime to the Panoply platform
 ```
 $ python setup.py install
 ```
+
 #### Usage
 
 ```python
