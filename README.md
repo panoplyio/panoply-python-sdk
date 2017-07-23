@@ -16,7 +16,7 @@ conn.write( "tablename", { "foo": "bar" } )
 ```
 #### Generating an API Key and Secret
 
-While logged into the panoply platform, click to add a new data source.  Select the Panoply SDK as your data source. This will automatically generate and display in your browser an API key and API secret. Use this key and secret to instantiate SDK objects.
+While logged into the Panoply.io platform, click to add a new data source.  Select the Panoply SDK as your data source. This will automatically generate and display in your browser an API key and API secret. Use this key and secret to instantiate SDK objects.
 
 #### API
 
