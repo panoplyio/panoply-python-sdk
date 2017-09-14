@@ -1,10 +1,11 @@
 import base64
 import json
 import time
-import urllib.request, urllib.error, urllib.parse
+import urllib.request
+import urllib.error
+import urllib.parse
 import threading
 import queue
-import logging
 from copy import copy
 from .constants import __package_name__, __version__
 
