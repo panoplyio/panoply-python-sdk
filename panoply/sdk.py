@@ -1,14 +1,15 @@
 import base64
 import json
 import time
-import urllib2
+import urllib.request
+import urllib.error
+import urllib.parse
 import threading
-import Queue
-import logging
+import queue
 from copy import copy
-from constants import __package_name__, __version__
+from .constants import __package_name__, __version__
 
-import events
+from . import events
 
 MAXSIZE = 1024 * 250  # 250kib
 FLUSH_TIMEOUT = 2.0   # 2 seconds
@@ -35,7 +36,7 @@ class SDK(events.Emitter):
         # decompose the api key and secret
         # api-key: ACCOUNT/RAND1
         # api-secret: BASE64( RAND2/UUID/AWSACCOUNT/REGION )
-        decoded = base64.b64decode(apisecret).split("/")
+        decoded = base64.b64decode(apisecret).decode().split("/")
         rand = decoded[0]
         awsaccount = decoded[2]
         region = decoded[3]
@@ -50,7 +51,7 @@ class SDK(events.Emitter):
             rand
         )
 
-        self._buffer = Queue.Queue()
+        self._buffer = queue.Queue()
         thread = threading.Thread(target=self._sendloop)
         thread.daemon = True
         thread.start()
@@ -60,7 +61,7 @@ class SDK(events.Emitter):
         data = copy(data)
         data["__table"] = table
         data = json.dumps(data).encode("utf-8")
-        data = urllib2.quote(data)
+        data = urllib.parse.quote(data)
         self._buffer.put(data + "\n")
 
     # flush the buffer to SQS
@@ -80,18 +81,18 @@ class SDK(events.Emitter):
             "MessageAttribute.3.Value.StringValue=" + pack,
         ]
 
-        body = "&".join(body)
+        body = bytearray("&".join(body), "utf-8")
 
         headers = {
             "Content-Length": len(body),
             "Content-Type": "application/x-www-form-urlencoded"
         }
-        print "SENDING NOW"
+        print("SENDING NOW")
 
-        req = urllib2.Request(self.qurl, body, headers)
+        req = urllib.request.Request(self.qurl, body, headers)
         self.fire("send", {"req": req})
         try:
-            res = urllib2.urlopen(req)
+            res = urllib.request.urlopen(req)
         except Exception as err:
             self.fire("error", err)
             return
@@ -106,7 +107,7 @@ class SDK(events.Emitter):
             try:
                 data = buf.get(True, FLUSH_TIMEOUT)  # blocking
                 body += data + "\n"
-            except Queue.Empty:
+            except queue.Empty:
                 pass
 
             length = len(body)
