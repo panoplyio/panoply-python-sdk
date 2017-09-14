@@ -1,6 +1,6 @@
 from distutils.core import setup
 
-execfile('panoply/constants.py')
+exec(compile(open('panoply/constants.py').read(), 'panoply/constants.py', 'exec'))
 
 
 setup(

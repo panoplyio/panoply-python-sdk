@@ -8,6 +8,6 @@ sdk = panoply.SDK(KEY, SECRET)
 sdk.write('roi-test', {'hello': 1})
 
 
-print sdk.qurl
+print(sdk.qurl)
 
 time.sleep(5)

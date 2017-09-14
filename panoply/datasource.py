@@ -1,6 +1,6 @@
-import events
+from . import events
 import requests
-from errors import PanoplyException
+from .errors import PanoplyException
 import traceback
 
 
@@ -104,7 +104,7 @@ def validate_token(refresh_url, exceptions=(), callback=None,
                         _callback(self.source.get(access_key))
 
                     return f(*args)
-                except Exception, e:
+                except Exception as e:
                     self.log('Error: Access token can\'t be revalidated. '
                              'The user would have to re-authenticate',
                              traceback.format_exc())
