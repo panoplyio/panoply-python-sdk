@@ -115,7 +115,9 @@ Report the current state of the data collection.
 
 For supported data sources, in the event of a failure, data collection is retried and this state object is provided together with the source dict to allow for the data source to continue from where it left off. An example of a state object would be the name of the current resource (tablename/api endpoint) and the number of data objects already fetched:
 
-    {"state_id": "unique_id`, "state": {"table": "users", "loaded": 500}}
+    # Note that `tableName` is used as a key so that merging this state object
+    # into previous ones will override the loaded value.
+    {"state_id": "unique_id`, "state": { "tableName": "loaded": 500}}
 
 With this state object, the data source would be able to use the `loaded` value as a `SKIP` or `OFFSET` parameter.
 
