@@ -107,6 +107,7 @@ Update the progress of the data source during calls to `read()`. It's used by th
 
 ###### state(self, state_id, state)
 Report the current state of the data collection. Each state that is reported should have a **unique** `state_id` across the entire process.
+Each data object returned by the source should contain a `__state` key with the value of the current `state_id` of the batch that is being returned.
 
 For supported data sources, in the event of a failure, data collection is retried and this state object is provided together with the source dict to allow for the data source to continue from where it left off. An example of a state object would be the name of the current resource (tablename/api endpoint) and the number of data objects already fetched:
 `{"state_id": "unique_id`, "state": {"table": "users", "loaded" 500}}`. With this state object, the data source would be able to use the `loaded` value
