@@ -1,3 +1,4 @@
+import time
 import events
 import requests
 from errors import PanoplyException
@@ -24,7 +25,8 @@ class DataSource(events.Emitter):
         else:
             print(msgs)
 
-    def state(self, state_id, state):
+    def state(self, state):
+        state_id = str(time.time())
         self.fire('source-state', {
             "stateId": state_id,
             "state": state
