@@ -105,6 +105,13 @@ Writes a message to the log. It's advised to add log lines extensively in order 
 
 Update the progress of the data source during calls to `read()`. It's used by the UI to show a progress bar, and for internal monitoring. You want to call `.progress()` at least once per `read()` call. `loaded` and `total` are integers, representing the number of resources loaded out of the total number of resources. It can be anything, like db rows, files, API calls, etc. `msg` is an optional human-readable text describing the progress status, for example: `3,000/6,000 files loaded`. For the best user experience, it is advised to provide a clear and coherent message.
 
+###### state(self, state_id, state)
+Report the current state of the data collection. Each state that is reported should have a **unique** `state_id` across the entire process.
+
+For supported data sources, in the event of a failure, data collection is retried and this state object is provided together with the source dict to allow for the data source to continue from where it left off. An example of a state object would be the name of the current resource (tablename/api endpoint) and the number of data objects already fetched:
+`{"state_id": "unique_id`, "state": {"table": "users", "loaded" 500}}`. With this state object, the data source would be able to use the `loaded` value
+as a `SKIP` or `OFFSET` parameter.
+
 ###### fire(self, type, data)
 
 Fire an event of type `type` with the specified `data`.
