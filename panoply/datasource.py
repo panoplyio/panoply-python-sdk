@@ -24,6 +24,12 @@ class DataSource(events.Emitter):
         else:
             print(msgs)
 
+    def state(self, state_id, state):
+        self.fire('source-state', {
+            "stateId": state_id,
+            "state": state
+        })
+
     def progress(self, loaded, total, msg=''):
         self.fire('progress', {
             'loaded': loaded,
