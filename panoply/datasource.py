@@ -7,9 +7,6 @@ from errors import PanoplyException
 class DataSource(events.Emitter):
     """ A base DataSource object """
 
-    source = None
-    options = None
-
     def __init__(self, source, options={}):
         super(DataSource, self).__init__()
 
