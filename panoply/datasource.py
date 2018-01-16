@@ -1,41 +1,52 @@
 import events
 import requests
-from errors import PanoplyException
 import traceback
+from errors import PanoplyException
 
 
-# abstract DataSource object
 class DataSource(events.Emitter):
+    """ A base DataSource object """
 
-    source = None
-    options = None
-
-    # data source constructor
     def __init__(self, source, options={}):
         super(DataSource, self).__init__()
 
         self.source = source
         self.options = options
 
-    # log a message
     def log(self, *msgs):
+        """ Log a message """
+
         if 'logger' in self.options:
             self.options['logger'](msgs)
         else:
             print(msgs)
 
     def state(self, state_id, state):
+        """ Notify on a change in state """
+
         self.fire('source-state', {
             "stateId": state_id,
             "state": state
         })
 
     def progress(self, loaded, total, msg=''):
+        """ Notify on a progress change """
+
         self.fire('progress', {
             'loaded': loaded,
             'total': total,
             'msg': msg
         })
+
+    def raw(self, tag, raw, metadata):
+        """ Create a raw response object """
+
+        return {
+            'type': 'raw',
+            'tag': tag,
+            'raw': raw,
+            'metadata': metadata
+        }
 
 
 def validate_token(refresh_url, exceptions=(), callback=None,
