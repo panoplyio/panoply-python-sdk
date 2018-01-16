@@ -38,6 +38,16 @@ class DataSource(events.Emitter):
             'msg': msg
         })
 
+    def raw(self, tag, raw, metadata):
+        """ Create a raw response object """
+
+        return {
+            'type': 'raw',
+            'tag': tag,
+            'raw': raw,
+            'metadata': metadata
+        }
+
 
 def validate_token(refresh_url, exceptions=(), callback=None,
                    access_key='access_token', refresh_key='refresh_token'):
