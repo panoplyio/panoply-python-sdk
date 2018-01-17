@@ -1,5 +1,5 @@
 # panoply-python-sdk
-SQS-based Python SDK for streaming data in realtime to the Panoply platform
+SQS-based Python SDK for streaming data in real-time to the Panoply platform.
 
 #### Install
 
@@ -32,9 +32,9 @@ Writes a record with the arbitrary `data` dictionary into `tablename`. Not that 
 
 Sets the handler for the given event name. Available events are:
 
- * `error`
- * `send`, emitted immediately before sending a batch to the Panoply queue.
- * `flush`, emitted immediately after successfully sending a batch to the panoply queue.
+ * `send` - emitted immediately **before** sending a batch to the Panoply queue.
+ * `flush` - emitted immediately **after** successfully sending a batch to the panoply queue.
+ * `error` - emitted when an error occurred during the process.
 
 
 # Building Data Sources
@@ -67,7 +67,7 @@ class MyDataSource(panoply.DataSource):
 
 The `DataSource` base class exposes the following methods:
 
-###### __init__(self, source, options)
+###### \_\_init\_\_(self, source, options)
 
 Constructor. Receives a dictionary with the data `source` parameters (see below) and a dictionary with any additional `options`. Generally, it's safe to disregard the options, however it may be used for performance optimizations, as it contains hints about incremental keys, excluded fields, etc. It may also contain additional parameters that can't be transferred with the source (e.g. secret keys).
 
@@ -90,7 +90,7 @@ def __init__(self, source, options):
 
 Required abstract function. Reads up to `N` objects from the source. `N` is just a hint for the number of objects to return, but it can be disregarded if it's not relevant for your specific data source. This method should return either:
 
-* List of arbitrary objects (python dictionaries), preferably in a large batch. For performance, it's advised to return a large amount of objects, as close as possible to N.
+* List of arbitrary objects (python dictionaries). For performance sake, it's advised to return a large batch of objects, as close as possible to N.
 * `None`, to indicate an EOF when all of the available data has been read.
 
 ###### close(self)
@@ -120,6 +120,16 @@ For supported data sources, in the event of a failure, data collection is retrie
     {"state_id": "unique_id`, "state": { "tableName": "loaded": 500}}
 
 With this state object, the data source would be able to use the `loaded` value as a `SKIP` or `OFFSET` parameter.
+
+###### raw(self, tag, raw, metadata)
+
+Constructs a `raw` message object.
+
+This is useful when you wish to send raw messages (bytes) and need a way to attach additional information to each message.
+
+* `tag` - A unique identifier that allows linking between the message and its metadata e.g. file name, batch ID etc.
+* `raw` - The raw message.
+* `metadata` - A dictionary of fields you wish to append to the message e.g. `{ '__state': 'my-state-id' }`
 
 ###### fire(self, type, data)
 
