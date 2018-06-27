@@ -109,7 +109,7 @@ Update the progress of the data source during calls to `read()`. It's used by th
 
 Report the current state of the data collection.
 
-- Each state that is reported should have a **unique** `state_id` across the entire process.
+- Each state that is reported should have a **unique** `state_id` for each batch.
 - Each data object returned by the source should contain a `__state` key with the value of the current `state_id` of the batch that is being returned.
 - Note that every state object that is reported is **merged into one** - this allows for incremental updates to the progress of each resource.
 
