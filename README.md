@@ -196,9 +196,13 @@ The `validate_token` decorator may be used in data sources having OAuth2 authent
 import panoply
 
 class Stream(panoply.DataSource):
-    @panoply.validate_token('https://oauth.provider/token/refresh', HttpError, 'my_callback')
     def read(self, n=None):
         # call an authenticated process relying on the validity of the access token
+        ...
+
+    @panoply.validate_token('https://oauth.provider/token/refresh', HttpError, 'my_callback')
+    def _request(self, path):
+        # make a simple request to the provided path/endpoint
         ...
 
     def my_callback(new_token):
