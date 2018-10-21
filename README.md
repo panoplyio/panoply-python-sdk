@@ -197,12 +197,12 @@ import panoply
 
 class Stream(panoply.DataSource):
     def read(self, n=None):
-        # call an authenticated process relying on the validity of the access token
         ...
 
     @panoply.validate_token('https://oauth.provider/token/refresh', HttpError, 'my_callback')
-    def _request(self, path):
-        # make a simple request to the provided path/endpoint
+    def _request(self, endpoint):
+        # make a request to the provided endpoint, relying on the validity of the access token 
+        # should not cause any side effects on the collection process when retried
         ...
 
     def my_callback(new_token):
