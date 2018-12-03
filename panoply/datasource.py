@@ -1,3 +1,5 @@
+import base64
+
 import events
 import requests
 import traceback
@@ -40,7 +42,7 @@ class DataSource(events.Emitter):
 
     def raw(self, tag, raw, metadata):
         """ Create a raw response object """
-
+        raw = base64.b64encode(raw)
         return {
             'type': 'raw',
             'tag': tag,
