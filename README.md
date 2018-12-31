@@ -14,6 +14,9 @@ import panoply
 conn = panoply.SDK( "APIKEY", "APISECRET" )
 conn.write( "tablename", { "foo": "bar" } )
 ```
+
+Note the SDK uses an internal buffer to store events and actually sends them once the buffer is full or a timeout is reached.
+If your scripts exits too early while the buffer is full - it is the developers responsibility to wait enough time for the timeout to occur.
 #### Generating an API Key and Secret
 
 While logged into the Panoply.io platform, click to add a new data source.  Select the Panoply SDK as your data source. This will automatically generate and display in your browser an API key and API secret. Use this key and secret to instantiate SDK objects.
@@ -201,7 +204,7 @@ class Stream(panoply.DataSource):
 
     @panoply.validate_token('https://oauth.provider/token/refresh', HttpError, 'my_callback')
     def _request(self, endpoint):
-        # make a request to the provided endpoint, relying on the validity of the access token 
+        # make a request to the provided endpoint, relying on the validity of the access token
         # should not cause any side effects on the collection process when retried
         ...
 
