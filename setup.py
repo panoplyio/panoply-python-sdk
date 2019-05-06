@@ -11,7 +11,7 @@ setup(
     version=__version__,
     packages=["panoply"],
     install_requires=[
-        "requests==2.3.0",
+        "requests==2.21.0",
         "oauth2client==4.1.1"
     ],
     extras_require={
