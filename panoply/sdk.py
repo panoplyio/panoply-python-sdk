@@ -1,20 +1,19 @@
 import base64
 import json
 import time
-import urllib2
+from urllib.request import urlopen
 import threading
-import Queue
+import queue
 import logging
 from copy import copy
-from constants import __package_name__, __version__
-
-import events
+from . constants import __package_name__, __version__
+from . events import *
 
 MAXSIZE = 1024 * 250  # 250kib
 FLUSH_TIMEOUT = 2.0   # 2 seconds
 
 
-class SDK(events.Emitter):
+class SDK(Emitter):
 
     account = None
     apikey = None
@@ -86,7 +85,7 @@ class SDK(events.Emitter):
             "Content-Length": len(body),
             "Content-Type": "application/x-www-form-urlencoded"
         }
-        print "SENDING NOW"
+        print("SENDING NOW")
 
         req = urllib2.Request(self.qurl, body, headers)
         self.fire("send", {"req": req})

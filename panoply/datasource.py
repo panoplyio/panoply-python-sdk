@@ -1,12 +1,12 @@
 import base64
 
-import events
+from . events from events
 import requests
 import traceback
-from errors import PanoplyException
+from . errors import PanoplyException
 
 
-class DataSource(events.Emitter):
+class DataSource(Emitter):
     """ A base DataSource object """
 
     def __init__(self, source, options={}):
@@ -123,7 +123,7 @@ def validate_token(refresh_url, exceptions=(), callback=None,
                         _callback(self.source.get(access_key))
 
                     return f(*args)
-                except Exception, e:
+                except Exception as e:
                     self.log('Error: Access token can\'t be revalidated. '
                              'The user would have to re-authenticate',
                              traceback.format_exc())
