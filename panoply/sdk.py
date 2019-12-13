@@ -1,7 +1,8 @@
 import base64
 import json
 import time
-from urllib.request import urlopen
+import urllib.request
+import urllib.parse
 import threading
 import queue
 import logging
@@ -34,7 +35,7 @@ class SDK(Emitter):
         # decompose the api key and secret
         # api-key: ACCOUNT/RAND1
         # api-secret: BASE64( RAND2/UUID/AWSACCOUNT/REGION )
-        decoded = base64.b64decode(apisecret).split("/")
+        decoded = base64.b64decode(apisecret).decode("utf-8").split("/")
         rand = decoded[0]
         awsaccount = decoded[2]
         region = decoded[3]
@@ -59,7 +60,7 @@ class SDK(Emitter):
         data = copy(data)
         data["__table"] = table
         data = json.dumps(data).encode("utf-8")
-        data = urllib2.quote(data)
+        data = urllib.parse.quote(data)
         self._buffer.put(data + "\n")
 
     # flush the buffer to SQS
@@ -87,10 +88,10 @@ class SDK(Emitter):
         }
         print("SENDING NOW")
 
-        req = urllib2.Request(self.qurl, body, headers)
+        req = urllib.request.Request(self.qurl, body, headers)
         self.fire("send", {"req": req})
         try:
-            res = urllib2.urlopen(req)
+            res = urllib.request.urlopen(req)
         except Exception as err:
             self.fire("error", err)
             return
