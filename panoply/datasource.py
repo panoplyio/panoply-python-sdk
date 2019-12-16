@@ -1,6 +1,6 @@
 import base64
 
-from . events from events
+from . events import events
 import requests
 import traceback
 from . errors import PanoplyException
