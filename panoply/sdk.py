@@ -50,7 +50,7 @@ class SDK(Emitter):
             rand
         )
 
-        self._buffer = Queue.Queue()
+        self._buffer = queue.Queue()
         thread = threading.Thread(target=self._sendloop)
         thread.daemon = True
         thread.start()
@@ -106,7 +106,7 @@ class SDK(Emitter):
             try:
                 data = buf.get(True, FLUSH_TIMEOUT)  # blocking
                 body += data + "\n"
-            except Queue.Empty:
+            except queue.Empty:
                 pass
 
             length = len(body)
