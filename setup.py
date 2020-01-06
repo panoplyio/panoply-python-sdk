@@ -3,8 +3,7 @@ try:
 except ImportError:
     from distutils.core import setup
 
-execfile('panoply/constants.py')
-
+exec(open('panoply/constants.py').read())
 
 setup(
     name=__package_name__,
