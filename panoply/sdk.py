@@ -35,7 +35,7 @@ class SDK(events.Emitter):
         # decompose the api key and secret
         # api-key: ACCOUNT/RAND1
         # api-secret: BASE64( RAND2/UUID/AWSACCOUNT/REGION )
-        decoded = base64.b64decode(apisecret).split("/")
+        decoded = base64.b64decode(apisecret).decode().split("/")
         rand = decoded[0]
         awsaccount = decoded[2]
         region = decoded[3]
@@ -66,7 +66,7 @@ class SDK(events.Emitter):
     # flush the buffer to SQS
     def _send(self, body):
         pack = __package_name__ + "-" + __version__
-        body = [
+        data = [
             "Action=SendMessage",
             "MessageBody=" + body,
             "MessageAttribute.1.Name=key",
@@ -80,15 +80,15 @@ class SDK(events.Emitter):
             "MessageAttribute.3.Value.StringValue=" + pack,
         ]
 
-        body = "&".join(body)
+        data = "&".join(data).encode()
 
         headers = {
-            "Content-Length": len(body),
+            "Content-Length": len(data),
             "Content-Type": "application/x-www-form-urlencoded"
         }
         print("SENDING NOW")
 
-        req = urllib.request.Request(self.qurl, body, headers)
+        req = urllib.request.Request(self.qurl, data, headers)
         self.fire("send", {"req": req})
         try:
             res = urllib.request.urlopen(req)
