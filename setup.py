@@ -3,7 +3,13 @@ try:
 except ImportError:
     from distutils.core import setup
 
-execfile('panoply/constants.py')
+exec(
+    compile(
+        open('panoply/constants.py', "rb").read(),
+        'panoply/constants.py',
+        'exec'
+    )
+)
 
 
 setup(
