@@ -1,7 +1,9 @@
 import base64
 import json
 import time
-import urllib.request, urllib.error, urllib.parse
+import urllib.request
+import urllib.error
+import urllib.parse
 import threading
 import queue
 import logging
