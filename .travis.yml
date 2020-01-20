@@ -11,6 +11,6 @@ install:
 
 # Each step below must succeed for the build to pass
 script:
-    - coverage run --source=. test.py
+    - coverage run --source=./tests test.py
     - coverage report -m
     - pycodestyle --format=pylint --count .
