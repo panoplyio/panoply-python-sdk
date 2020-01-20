@@ -1,6 +1,6 @@
 sudo: false
 language: python
-python: 2.7
+python: 3.8
 
 branches:
  only:
@@ -11,6 +11,6 @@ install:
 
 # Each step below must succeed for the build to pass
 script:
-    - coverage run --source=. test.py
-    - coverage report -m
+    - python3-coverage run --source=. test.py
+    - python3-coverage report -m
     - pep8 --format=pylint --count .
