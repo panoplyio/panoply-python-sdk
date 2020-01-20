@@ -22,8 +22,8 @@ setup(
     ],
     extras_require={
         "test": [
-            "pep8==1.7.0",
-            "coverage==4.3.4"
+            "pep8==2.3.1",
+            "python3-coverage==4.5"
         ]
     },
     url="https://github.com/panoplyio/panoply-python-sdk",
