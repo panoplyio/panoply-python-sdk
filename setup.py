@@ -22,7 +22,7 @@ setup(
     ],
     extras_require={
         "test": [
-            "pep8==2.3.1",
+            "pycodestyle==2.4.0",
             "python3-coverage==4.5"
         ]
     },
