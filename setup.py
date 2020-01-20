@@ -23,7 +23,7 @@ setup(
     extras_require={
         "test": [
             "pycodestyle==2.4.0",
-            "python3-coverage==4.5"
+            "coverage==4.5.1"
         ]
     },
     url="https://github.com/panoplyio/panoply-python-sdk",
