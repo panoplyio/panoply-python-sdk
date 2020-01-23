@@ -1,6 +1,6 @@
 sudo: false
 language: python
-python: 2.7
+python: 3.8
 
 branches:
  only:
@@ -13,4 +13,4 @@ install:
 script:
     - coverage run --source=. test.py
     - coverage report -m
-    - pep8 --format=pylint --count .
+    - pycodestyle --format=pylint --count .
