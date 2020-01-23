@@ -1,2 +1,2 @@
-__version__ = "1.6.3"
+__version__ = "2.0.0"
 __package_name__ = "panoply-python-sdk"
