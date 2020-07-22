@@ -131,8 +131,6 @@ def validate_token(refresh_url, exceptions=(), callback=None,
                         else:
                             _callback = getattr(self, callback)
                         _callback(self.source.get(access_key))
-
-                    return f(*args)
                 except Exception as e:
                     self.log('Error: Access token can\'t be revalidated. '
                              'The user would have to re-authenticate',
@@ -141,5 +139,7 @@ def validate_token(refresh_url, exceptions=(), callback=None,
                     raise PanoplyException(
                         'access token could not be refreshed ({})'
                         .format(str(e)), retryable=False)
+
+                return f(*args)
         return wrapper
     return _validate_token
