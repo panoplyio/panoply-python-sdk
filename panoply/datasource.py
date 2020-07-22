@@ -1,5 +1,6 @@
 import base64
 
+import backoff
 from . import events
 import requests
 import traceback
@@ -49,6 +50,15 @@ class DataSource(events.Emitter):
             'raw': raw,
             'metadata': metadata
         }
+
+
+@backoff.on_exception(backoff.expo,
+                      requests.exceptions.RequestException,
+                      max_tries=3)
+def __send_request(url, data):
+    response = requests.post(url, data=data)
+    response.raise_for_status()
+    return response
 
 
 def validate_token(refresh_url, exceptions=(), callback=None,
@@ -107,7 +117,7 @@ def validate_token(refresh_url, exceptions=(), callback=None,
                     token = self.source.get(refresh_key)
                     data = dict(self.options['refresh'],
                                 **{refresh_key: token})
-                    r = requests.post(refresh_url, data=data)
+                    r = __send_request(refresh_url, data=data)
                     self.source[access_key] = r.json()[access_key]
 
                     # save the new token in the database
