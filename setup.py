@@ -20,7 +20,7 @@ setup(
         "requests==2.21.0",
         "oauth2client==4.1.1",
         "backoff==1.10.0",
-        "rsa==4.6"
+        "rsa==4.5.0"
     ],
     extras_require={
         "test": [
