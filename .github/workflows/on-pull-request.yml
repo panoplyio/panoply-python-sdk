@@ -1,4 +1,4 @@
-name: Salesforce data source
+name: Panoply Python SDK
 
 on:
   pull_request:
