@@ -44,7 +44,7 @@ jobs:
     - name: Checkout master
       uses: actions/checkout@v2
       with:
-        repository: panoplyio/source-salesforce
+        repository: panoplyio/panoply-python-sdk
         token: ${{ secrets.CI_USER_GITHUB_TOKEN }}
         path: master
 
