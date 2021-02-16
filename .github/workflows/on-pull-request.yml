@@ -1,0 +1,65 @@
+name: Salesforce data source
+
+on:
+  pull_request:
+    types: [assigned, opened, synchronize, reopened, closed]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-18.04
+
+    steps:
+    - id: checkout_ds_repo
+      name: Checkout this repo
+      uses: actions/checkout@v2
+      with:
+        path: working_source
+
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.8
+
+    - id: ds
+      name: Install DS
+      env:
+        GITAUTH: ${{ secrets.CI_USER_GITHUB_TOKEN }}
+      run: |
+        cd working_source
+        python -m pip install --upgrade pip
+        pip install -e .[test]
+    - name: Run unit tests, coverage, and linting
+      run: |
+        cd working_source
+        coverage run --source=. test.py
+        coverage report -m
+        pycodestyle --format=pylint --count --max-line-length=120 .
+
+    - name: Retrieve DS version
+      run: |
+        echo "TAG_NAME=$(python -c "from importlib.metadata import version; print(version(\"panoply-python-sdk\"))")" >> $GITHUB_ENV
+
+    # Checkout master in order to check if the tag name is still available.
+    - name: Checkout master
+      uses: actions/checkout@v2
+      with:
+        repository: panoplyio/source-salesforce
+        token: ${{ secrets.CI_USER_GITHUB_TOKEN }}
+        path: master
+
+    - name: Check tag name availability
+      run: |
+        # Check tag on master
+        cd master
+        DETAILS=$(git ls-remote --exit-code --tags origin "v${{ env.TAG_NAME }}" || echo "")
+        if [ "$DETAILS" != "" ]; then echo "v${{ env.TAG_NAME }} tag_name is already used."; exit 1; fi
+
+    - id: create_release
+      if: github.base_ref == 'master' && github.event.pull_request.merged == true
+      name: Create release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.CI_USER_GITHUB_TOKEN }}
+      with:
+        tag_name: "v${{ env.TAG_NAME }}"
