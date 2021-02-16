@@ -19,7 +19,8 @@ setup(
     install_requires=[
         "requests==2.21.0",
         "oauth2client==4.1.1",
-        "backoff==1.10.0"
+        "backoff==1.10.0",
+        "rsa==4.6"
     ],
     extras_require={
         "test": [
