@@ -34,7 +34,6 @@ jobs:
         cd working_source
         coverage run --source=. test.py
         coverage report -m
-        pycodestyle --format=pylint --count --max-line-length=120 .
 
     - name: Retrieve DS version
       run: |

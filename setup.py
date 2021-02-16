@@ -10,10 +10,8 @@ setup(
     name=__package_name__,
     version=__version__,
     packages=["panoply"],
-    setup_requires=[
-        "rsa==4.5.0"
-    ],
     install_requires=[
+        "rsa==4.5.0",
         "requests==2.21.0",
         "oauth2client==4.1.1"
     ],
