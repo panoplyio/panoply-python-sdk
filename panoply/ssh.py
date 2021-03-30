@@ -69,7 +69,7 @@ class SSHTunnel:
         How to Use:
 
             1) tunnel = SSHTunnel('127.0.0.1', 27017, {...params}, False)
-               server = tunnel._server
+               server = tunnel.server
                ... your code
                server.stop() - important, don't forget to close the socket
 
@@ -83,6 +83,10 @@ class SSHTunnel:
         self.port = port
         self.tunnel = ssh_tunnel
         self._server = self._get_server(platform_ssh)
+
+    @property
+    def server(self):
+        return self._server
 
     @property
     def port(self):

@@ -64,8 +64,7 @@ class TestSSHTunnel(TestCase):
         tunnel = panoply.SSHTunnel(
             '127.0.0.1', 27017, self.MOCKED_TUNNEL_OBJECT, True
         )
-
-        self.assertIsNone(tunnel._server)
+        self.assertIsNone(tunnel.server)
 
     @patch("paramiko.RSAKey.from_private_key")
     @patch("panoply.ssh.SSHTunnelForwarder")
