@@ -19,7 +19,9 @@ setup(
     install_requires=[
         "requests==2.21.0",
         "oauth2client==4.1.1",
-        "backoff==1.10.0"
+        "backoff==1.10.0",
+        "sshtunnel==0.1.5",
+        "paramiko==2.7.2",
     ],
     extras_require={
         "test": [
