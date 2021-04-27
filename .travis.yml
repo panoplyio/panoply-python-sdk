@@ -13,4 +13,4 @@ install:
 script:
     - coverage run --source=. test.py
     - coverage report -m
-    - pycodestyle --format=pylint --count .
+    - pycodestyle --format=pylint --max-line-length=120 --count .
