@@ -19,12 +19,12 @@ EXCEPTIONS_REGISTRY = {}
 
 
 class NormalizedException(PanoplyException):
-    def __init__(self, message, error_code, exception_cls,
+    def __init__(self, message, code, exception_cls,
                  phase, source_type, source_id, database_id,
                  retryable=True):
         super().__init__(message, retryable)
         self.message = message
-        self.error_code = error_code
+        self.code = code
         self.phase = phase
         self.source_type = source_type
         self.source_id = source_id
@@ -33,19 +33,19 @@ class NormalizedException(PanoplyException):
         self.created_at = datetime.utcnow()
 
 
-def set_internal_code(error_code: int) -> callable:
+def set_internal_code(code: int) -> callable:
     """ A decorator is used on exception classes to register mapping
         of error and internal code from ERROR_CODES_REGISTRY.
         Parameters
         ----------
-        error_code : int
+        code : int
            Error code from ERROR_CODES_REGISTRY.
     """
     def decorator(exception_cls: type) -> type:
         if not issubclass(exception_cls, BaseException):
             raise RuntimeError('Unable to set error code for non-Exception class')
 
-        EXCEPTIONS_REGISTRY[exception_cls] = error_code
+        EXCEPTIONS_REGISTRY[exception_cls] = code
 
         return exception_cls
 
@@ -71,17 +71,17 @@ def handle_errors(phase: str) -> callable:
                 if isinstance(source_config, DataSource):
                     source_config = getattr(source_config, 'source', None)
 
-                error_code = EXCEPTIONS_REGISTRY.get(type(e))
+                code = EXCEPTIONS_REGISTRY.get(type(e))
 
-                if error_code is None:
-                    error_code = 501
+                if code is None:
+                    code = 501
 
-                if error_code not in ERROR_CODES_REGISTRY:
-                    error_code = 506
+                if code not in ERROR_CODES_REGISTRY:
+                    code = 506
 
                 details = {
                     'message': str(e),
-                    'error_code': error_code,
+                    'code': code,
                     'exception_cls': str(type(e)),
                     'phase': phase,
                     'source_type': source_config['type'],
