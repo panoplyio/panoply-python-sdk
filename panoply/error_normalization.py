@@ -82,7 +82,7 @@ def handle_errors(phase: str) -> callable:
                 details = {
                     'message': str(e),
                     'code': code,
-                    'exception_cls': str(type(e)),
+                    'exception_cls': f'{e.__class__.__module__}.{e.__class__.__name__}',
                     'phase': phase,
                     'source_type': source_config['type'],
                     'source_id': source_config['id'],
