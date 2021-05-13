@@ -90,7 +90,6 @@ def handle_errors(phase: str) -> callable:
                     'retryable': getattr(e, 'retryable', True)
                 }
 
-                print(details)
                 normalized = NormalizedException(**details)
 
                 raise normalized
