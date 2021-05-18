@@ -1,6 +1,5 @@
-from panoply import DataSource, PanoplyException
-from datetime import datetime
-
+from panoply import DataSource
+from .exceptions import DataSourceException
 
 ERROR_CODES_REGISTRY = {
     400: 'Bad request',
@@ -16,21 +15,6 @@ ERROR_CODES_REGISTRY = {
 }
 
 EXCEPTIONS_REGISTRY = {}
-
-
-class NormalizedException(PanoplyException):
-    def __init__(self, message, code, exception_cls,
-                 phase, source_type, source_id, database_id,
-                 retryable=True):
-        super().__init__(message, retryable)
-        self.message = message
-        self.code = code
-        self.phase = phase
-        self.source_type = source_type
-        self.source_id = source_id
-        self.database_id = database_id
-        self.exception_cls = exception_cls
-        self.created_at = datetime.utcnow()
 
 
 def set_internal_code(code: int) -> callable:
@@ -52,14 +36,14 @@ def set_internal_code(code: int) -> callable:
     return decorator
 
 
-def handle_errors(phase: str) -> callable:
+def wrap_errors(phase: str) -> callable:
     """ A decorator is used to normalize raised exceptions.
        Parameters
        ----------
        phase : str
            Equals to config / collect.
     """
-    def _handle_errors(func: callable) -> callable:
+    def _wrap_errors(func: callable) -> callable:
         def wrapper(*args, **kwargs) -> list:
             try:
                 return func(*args, **kwargs)
@@ -90,8 +74,8 @@ def handle_errors(phase: str) -> callable:
                     'retryable': getattr(e, 'retryable', True)
                 }
 
-                normalized = NormalizedException(**details)
+                normalized = DataSourceException(**details)
 
                 raise normalized
         return wrapper
-    return _handle_errors
+    return _wrap_errors
