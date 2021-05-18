@@ -1,3 +1,5 @@
+from enum import Enum
+
 import panoply.datasource
 from .exceptions import DataSourceException
 
@@ -15,6 +17,11 @@ ERROR_CODES_REGISTRY = {
 }
 
 EXCEPTIONS_REGISTRY = {}
+
+
+class Phase(Enum):
+    COLLECT = 'collect'
+    CONFIG = 'config'
 
 
 def set_internal_code(code: int) -> callable:
@@ -36,12 +43,12 @@ def set_internal_code(code: int) -> callable:
     return decorator
 
 
-def wrap_errors(phase: str) -> callable:
+def wrap_errors(phase: Phase) -> callable:
     """ A decorator is used to normalize raised exceptions.
        Parameters
        ----------
-       phase : str
-           Equals to config / collect.
+       phase : Phase
+           Equals to CONFIG / COLLECT.
     """
     def _wrap_errors(func: callable) -> callable:
         def wrapper(*args, **kwargs) -> list:
@@ -67,7 +74,7 @@ def wrap_errors(phase: str) -> callable:
                     'message': str(e),
                     'code': code,
                     'exception_cls': f'{e.__class__.__module__}.{e.__class__.__name__}',
-                    'phase': phase,
+                    'phase': phase.value,
                     'source_type': source_config['type'],
                     'source_id': source_config['id'],
                     'database_id': source_config['database'],
