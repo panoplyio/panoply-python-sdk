@@ -2,7 +2,7 @@
     Module for storing SSH related stuff
 """
 from typing import Dict
-from paramiko import RSAKey
+from paramiko import RSAKey, Ed25519Key, SSHException
 from sshtunnel import SSHTunnelForwarder
 from io import StringIO
 
@@ -132,7 +132,12 @@ class SSHTunnel:
         if platform_ssh:
             return None
 
-        pkey = RSAKey.from_private_key(StringIO(self.tunnel["privateKey"]))
+        try:
+            pkey = RSAKey.from_private_key(StringIO(self.tunnel["privateKey"]),
+                                           password=self.tunnel.get("password"))
+        except SSHException:
+            pkey = Ed25519Key.from_private_key(StringIO(self.tunnel["privateKey"]),
+                                               password=self.tunnel.get("password"))
 
         server = SSHTunnelForwarder(
             ssh_address_or_host=(self.tunnel["host"], self.tunnel["port"]),
