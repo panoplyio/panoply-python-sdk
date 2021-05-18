@@ -1,4 +1,4 @@
-from panoply import DataSource
+import panoply.datasource
 from .exceptions import DataSourceException
 
 ERROR_CODES_REGISTRY = {
@@ -52,7 +52,7 @@ def wrap_errors(phase: str) -> callable:
                 # 1. a first param in dynamic params methods (e.g. definition(source, options))
                 # 2. an attribute of the DataSource class (e.g. definition(self, params) -> source = self.source)
                 source_config = args[0]
-                if isinstance(source_config, DataSource):
+                if isinstance(source_config, panoply.datasource.DataSource):
                     source_config = getattr(source_config, 'source', None)
 
                 code = EXCEPTIONS_REGISTRY.get(type(e))
