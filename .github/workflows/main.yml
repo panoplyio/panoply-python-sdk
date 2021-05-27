@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-18.04
     strategy:
       matrix:
-        python: [2.7.18, 3.8.2]
+        python: [ 3.8.2 ]
     steps:
     - name: Checkout this repository
       uses: actions/checkout@v2
@@ -23,7 +23,7 @@ jobs:
       with:
         python-version: ${{ matrix.python }}
 
-    - name: Install datasource
+    - name: Install
       env:
         GITAUTH: ${{ secrets.CI_USER_GITHUB_TOKEN }}
       run: |
