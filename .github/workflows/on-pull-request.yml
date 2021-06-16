@@ -1,40 +1,79 @@
-name: Panoply Python SDK
+name: Full CI/CD Panoply-Python-SDK
 
 on:
+  push:
+    branches: [ master ]
+
   pull_request:
-    types: [assigned, opened, synchronize, reopened, closed]
+    branches: [ master ]
 
 jobs:
-  build:
-
+  test_and_lint:
+    name: Run tests and linters
     runs-on: ubuntu-18.04
-
+    strategy:
+      matrix:
+        python: [ 2.7 ]
     steps:
-    - id: checkout_ds_repo
-      name: Checkout this repo
+    - name: Checkout this repository
       uses: actions/checkout@v2
-      with:
-        path: working_source
 
-    - name: Set up Python
+    - name: Set up python
       uses: actions/setup-python@v2
       with:
-        python-version: 2.7
+        python-version: ${{ matrix.python }}
 
-    - id: ds
-      name: Install DS
+    - name: Install panoply-python-sdk
       env:
         GITAUTH: ${{ secrets.CI_USER_GITHUB_TOKEN }}
       run: |
-        cd working_source
-        python -m pip install --upgrade pip
-        pip install -e .[test]
-    - name: Run unit tests, coverage, and linting
+        python -m pip install -e .[test]
+    - name: Run tests and coverage
+      id: testing
       run: |
-        cd working_source
-        coverage run --source=. test.py
+        if python -c "import pytest"; then
+          coverage run -m pytest tests
+        else
+          coverage run -m unittest discover tests
+        fi
         coverage report -m
-
-    - name: Retrieve DS version
+    - name: Run linters
+      if: |
+        success() && steps.testing.outcome == 'success' ||
+        failure() && steps.testing.outcome == 'failure'
       run: |
-        echo "TAG_NAME=$(python -c "from importlib.metadata import version; print(version(\"panoply-python-sdk\"))")" >> $GITHUB_ENV
+        pycodestyle --format=pylint --max-line-length=120 --count .
+  check_version:
+    name: Check for version tag availability
+    runs-on: ubuntu-18.04
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+    steps:
+    - name: Checkout this repository
+      uses: actions/checkout@v2
+
+    - name: Retrieve version
+      run: |
+        echo "TAG_NAME=$(python setup.py --version)" >> $GITHUB_ENV
+    - name: Output version
+      id: version
+      run: |
+        echo "::set-output name=version::${{env.TAG_NAME}}"
+    - name: Check tag name availability
+      run: |
+        ! git ls-remote --exit-code --tags origin "v${{ env.TAG_NAME }}"
+  create_release:
+    name: Create release
+    needs: [ test_and_lint, check_version ]
+    if: github.event_name == 'push'
+    runs-on: ubuntu-18.04
+    steps:
+    - name: Checkout this repository
+      uses: actions/checkout@v2
+
+    - name: Create release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.CI_USER_GITHUB_TOKEN }}
+      with:
+        tag_name: "v${{ needs.check_version.outputs.version }}"
