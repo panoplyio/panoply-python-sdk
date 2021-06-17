@@ -108,10 +108,10 @@ def validate_token(refresh_url, exceptions=(), callback=None,
         Defaults to `refresh_token`
     '''
     def _validate_token(f):
-        def wrapper(*args):
+        def wrapper(*args, **kwargs):
             self = args[0]
             try:
-                return f(*args)
+                return f(*args, **kwargs)
             except exceptions:
                 try:
                     self.log('Revalidating the access token...')
@@ -144,7 +144,7 @@ def validate_token(refresh_url, exceptions=(), callback=None,
                         'access token could not be refreshed ({})'
                         .format(str(e)), retryable=False)
 
-                return f(*args)
+                return f(*args, **kwargs)
         return wrapper
     return _validate_token
 
