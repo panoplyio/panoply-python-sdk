@@ -8,7 +8,7 @@ import backoff
 import requests
 
 from . import events
-from .errors.exceptions import OathValidationException
+from .errors.exceptions import TokenValidationException
 
 
 class DataSource(events.Emitter):
@@ -140,9 +140,8 @@ def validate_token(refresh_url, exceptions=(), callback=None,
                              'The user would have to re-authenticate',
                              traceback.format_exc())
                     # raise a non-retryable exception
-                    raise OathValidationException(
-                        'access token could not be refreshed ({})'
-                        .format(str(e)), retryable=False)
+                    raise TokenValidationException(e, 'access token could not ' 
+                        'be refreshed ({})'.format(str(e)), retryable=False)
 
                 return f(*args, **kwargs)
         return wrapper
