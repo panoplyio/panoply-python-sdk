@@ -27,5 +27,7 @@ class DataSourceException(PanoplyException):
         self.created_at = datetime.utcnow()
 
 
-class OathValidationException(PanoplyException):
-    pass
+class TokenValidationException(PanoplyException):
+    def __init__(self, original_error, args=None, retryable=True):
+        super().__init__(args, retryable)
+        self.original_error = original_error
