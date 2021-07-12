@@ -107,6 +107,7 @@ def validate_token(refresh_url, exceptions=(), callback=None,
         the refresh URL.
         Defaults to `refresh_token`
     '''
+
     def _validate_token(f):
         def wrapper(*args, **kwargs):
             self = args[0]
@@ -140,15 +141,19 @@ def validate_token(refresh_url, exceptions=(), callback=None,
                              'The user would have to re-authenticate',
                              traceback.format_exc())
                     # raise a non-retryable exception
-                    raise TokenValidationException(e, 'access token could not ' 
-                        'be refreshed ({})'.format(str(e)), retryable=False)
+                    raise TokenValidationException(e,
+                                                   'access token could not be'
+                                                   ' refreshed ({})'.format(str(e)),
+                                                   retryable=False)
 
                 return f(*args, **kwargs)
+
         return wrapper
+
     return _validate_token
 
 
-def background_progress(message, waiting_interval=10*60):
+def background_progress(message, waiting_interval=10 * 60):
     """ A decorator is used to emit progress while long operation is executed.
         For example, for database's data sources such operations might be
         declaration of the cursor or counting number of rows.
@@ -163,6 +168,7 @@ def background_progress(message, waiting_interval=10*60):
            Time in seconds to wait between progress emitting.
            Defaults to 10 minutes
     """
+
     def _background_progress(func):
         @wraps(func)
         def wrapper(*args, **kwargs):
