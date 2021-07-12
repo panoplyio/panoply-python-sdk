@@ -8,7 +8,7 @@ import backoff
 import requests
 
 from . import events
-from .errors import OathValidationException
+from .errors.exceptions import OathValidationException
 
 
 class DataSource(events.Emitter):
