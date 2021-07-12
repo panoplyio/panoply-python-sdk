@@ -25,3 +25,7 @@ class DataSourceException(PanoplyException):
         self.database_id = database_id
         self.exception_cls = exception_cls
         self.created_at = datetime.utcnow()
+
+
+class OathValidationException(PanoplyException):
+    pass

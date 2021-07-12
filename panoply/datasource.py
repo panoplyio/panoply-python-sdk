@@ -8,7 +8,7 @@ import backoff
 import requests
 
 from . import events
-from .errors import PanoplyException
+from .errors import OathValidationException
 
 
 class DataSource(events.Emitter):
@@ -140,7 +140,7 @@ def validate_token(refresh_url, exceptions=(), callback=None,
                              'The user would have to re-authenticate',
                              traceback.format_exc())
                     # raise a non-retryable exception
-                    raise PanoplyException(
+                    raise OathValidationException(
                         'access token could not be refreshed ({})'
                         .format(str(e)), retryable=False)
 
