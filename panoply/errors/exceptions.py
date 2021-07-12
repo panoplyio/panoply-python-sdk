@@ -25,3 +25,9 @@ class DataSourceException(PanoplyException):
         self.database_id = database_id
         self.exception_cls = exception_cls
         self.created_at = datetime.utcnow()
+
+
+class TokenValidationException(PanoplyException):
+    def __init__(self, original_error, args=None, retryable=True):
+        super().__init__(args, retryable)
+        self.original_error = original_error
