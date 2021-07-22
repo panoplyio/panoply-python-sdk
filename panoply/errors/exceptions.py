@@ -12,11 +12,10 @@ class IncorrectParamError(Exception):
         super().__init__(msg)
 
 
-class DataSourceException(PanoplyException):
+class DataSourceException(Exception):
     def __init__(self, message, code, exception_cls,
-                 phase, source_type, source_id, database_id,
-                 retryable=True):
-        super().__init__(message, retryable)
+                 phase, source_type, source_id, database_id):
+        super().__init__(message)
         self.message = message
         self.code = code
         self.phase = phase
