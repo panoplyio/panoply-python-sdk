@@ -77,8 +77,7 @@ def wrap_errors(phase: Phase) -> callable:
                     'phase': phase.value,
                     'source_type': source_config['type'],
                     'source_id': source_config['id'],
-                    'database_id': source_config['database'],
-                    'retryable': getattr(e, 'retryable', True)
+                    'database_id': source_config['database']
                 }
 
                 normalized = DataSourceException(**details)
