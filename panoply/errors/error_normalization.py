@@ -1,4 +1,5 @@
 from enum import Enum
+from functools import wraps
 
 import panoply.datasource
 from .exceptions import DataSourceException
@@ -51,6 +52,7 @@ def wrap_errors(phase: Phase) -> callable:
            Equals to CONFIG / COLLECT.
     """
     def _wrap_errors(func: callable) -> callable:
+        @wraps(func)
         def wrapper(*args, **kwargs) -> list:
             try:
                 return func(*args, **kwargs)
