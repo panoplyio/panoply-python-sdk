@@ -114,7 +114,7 @@ class SDK(events.Emitter):
             length = len(body)
             elapsed = time.time() - lastsend
 
-            if length is 0:
+            if length == 0:
                 # reset the time when there's nothing to send
                 lastsend = time.time()
             elif length > MAXSIZE or elapsed > FLUSH_TIMEOUT:
