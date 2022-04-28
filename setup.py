@@ -22,14 +22,15 @@ setup(
         "backoff==1.10.0",
         "sshtunnel==0.1.5",
         "paramiko==2.7.2",
+        "cryptography==36.0.2",
     ],
     extras_require={
         "test": [
             "pycodestyle==2.4.0",
-            "coverage==4.5.1"
-        ]
+            "coverage==4.5.1",
+        ],
     },
     url="https://github.com/panoplyio/panoply-python-sdk",
     author="Panoply.io",
-    author_email="support@panoply.io"
+    author_email="support@panoply.io",
 )
