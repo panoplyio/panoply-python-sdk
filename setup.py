@@ -21,8 +21,7 @@ setup(
         "oauth2client==4.1.1",
         "backoff==1.10.0",
         "sshtunnel==0.1.5",
-        "paramiko==2.7.2",
-        "cryptography==36.0.2",
+        "paramiko==2.11.0",
     ],
     extras_require={
         "test": [
