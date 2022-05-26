@@ -56,6 +56,11 @@ def wrap_errors(phase: Phase) -> callable:
         def wrapper(*args, **kwargs) -> list:
             try:
                 return func(*args, **kwargs)
+            except DataSourceException as e:
+                # In case of nested error wrapper we should keep the original
+                # error but with the phase value of the last error wrapper
+                e.phase = phase.value
+                raise e
             except Exception as e:
                 # source object can be:
                 # 1. a first param in dynamic params methods (e.g. definition(source, options))
