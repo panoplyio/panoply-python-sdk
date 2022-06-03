@@ -8,17 +8,52 @@ import backoff
 import requests
 
 from . import events
-from .errors.exceptions import TokenValidationException
+from .errors.exceptions import (TokenValidationException, MethodNotImplementedError, UnableToGetPanoplyResource)
 
 
 class DataSource(events.Emitter):
     """ A base DataSource object """
 
-    def __init__(self, source, options={}):
+    def __init__(self, source, options={}, validate_methods=True):
         super(DataSource, self).__init__()
 
         self.source = source
         self.options = options
+        if validate_methods:
+            self.validate_methods()
+
+    def validate_methods(self):
+        self.validate_read()
+        first_resource_id = self.validate_list_resources_and_get_first_resource()
+        self.validate_get_resource(first_resource_id)
+
+    def validate_read(self):
+        return self.is_implemented("read")
+
+    def validate_list_resources_and_get_first_resource(self):
+        if self.is_implemented("list_resources"):
+            self.log("Trying to fetch resources list.")
+            try:
+                resources = self.list_resources(self.source, self.options)
+                self.log(f"Successfully fetched {len(resources)} resources.")
+                return resources[0]["id"]
+            except Exception as e:
+                raise UnableToGetPanoplyResource(str(e))
+
+    def validate_get_resource(self, resource_id):
+        if self.is_implemented("get_resource"):
+            self.log(f"Trying to get resource `{resource_id}`.")
+            try:
+                resource = self.get_resource(self.source, self.options, resource_id)
+                fields_number = len(resource.get('fields', []))
+                self.log(f"Successfully fetched resource `{resource_id}` with {fields_number} fields.")
+            except Exception as e:
+                raise UnableToGetPanoplyResource(str(e))
+
+    def is_implemented(self, func_name):
+        if not hasattr(self, func_name):
+            raise MethodNotImplementedError(func_name)
+        return True
 
     def log(self, *msgs):
         """ Log a message """
@@ -67,7 +102,8 @@ def __send_request(url, data):
 
 def validate_token(refresh_url, exceptions=(), callback=None,
                    access_key='access_token', refresh_key='refresh_token'):
-    ''' a decorator used to validate the access_token for oauth based
+    """
+    a decorator used to validate the access_token for oauth based
     data sources.
     This decorator should be used on every method in the data source that
     fetches data from the oauth controlled resource, and that relies on a
@@ -106,7 +142,7 @@ def validate_token(refresh_url, exceptions=(), callback=None,
         The refresh token key as defined in the source and in the request to
         the refresh URL.
         Defaults to `refresh_token`
-    '''
+    """
 
     def _validate_token(f):
         def wrapper(*args, **kwargs):

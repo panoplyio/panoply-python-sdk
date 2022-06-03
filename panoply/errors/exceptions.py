@@ -30,3 +30,24 @@ class TokenValidationException(PanoplyException):
     def __init__(self, original_error, args=None, retryable=True):
         super().__init__(args, retryable)
         self.original_error = original_error
+
+
+class MethodNotImplementedError(Exception):
+    def __init__(self, method_name: str):
+        message = f"`{method_name}` is not implemented."
+        super().__init__(message)
+
+
+class WrongTypeOrValueError(Exception):
+    def __init__(self, message: str):
+        super().__init__(message)
+
+
+class UnableToListPanoplyResources(Exception):
+    def __init__(self, message: str):
+        super().__init__(message)
+
+
+class UnableToGetPanoplyResource(Exception):
+    def __init__(self, message: str):
+        super().__init__(message)
