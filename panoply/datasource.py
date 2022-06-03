@@ -8,7 +8,8 @@ import backoff
 import requests
 
 from . import events
-from .errors.exceptions import (TokenValidationException, MethodNotImplementedError, UnableToGetPanoplyResource)
+from .errors.exceptions import (TokenValidationException, MethodNotImplementedError,
+                                UnableToListPanoplyResources, UnableToGetPanoplyResource)
 
 
 class DataSource(events.Emitter):
@@ -38,7 +39,7 @@ class DataSource(events.Emitter):
                 self.log(f"Successfully fetched {len(resources)} resources.")
                 return resources[0]["id"]
             except Exception as e:
-                raise UnableToGetPanoplyResource(str(e))
+                raise UnableToListPanoplyResources(str(e))
 
     def validate_get_resource(self, resource_id):
         if self.is_implemented("get_resource"):
