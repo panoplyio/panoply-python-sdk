@@ -10,7 +10,7 @@ import backoff
 import requests
 
 from . import events
-from .errors.exceptions import (TokenValidationException, UnableToListPanoplyResources, UnableToGetPanoplyResource)
+from .errors.exceptions import TokenValidationException
 from .records import PanoplyRecordGroup
 from .resources import PanoplyResource
 
@@ -18,50 +18,30 @@ from .resources import PanoplyResource
 class DataSource(events.Emitter, metaclass=ABCMeta):
     """ A base DataSource object """
 
-    def __init__(self, source, options={}, validate_methods=True):
+    def __init__(self, source, options={}):
         super(DataSource, self).__init__()
 
         self.source = source
         self.options = options
-        if validate_methods:
-            self.validate_metadata_methods()
 
     @abstractmethod
     def read(self, batch_size=None) -> List[PanoplyRecordGroup]:
         """
-        Reads data from the sources and returns it as records
+        Reads data from the sources and returns it as record group
         """
-        return
 
     @abstractmethod
     def get_resource(self, source, options, resource_id: str) -> PanoplyResource:
-        return
+        """
+        Returns a PanoplyResource object with the list of fields
+        """
 
     @abstractmethod
     def list_resources(self, source, options) -> List[PanoplyResource]:
-        return
-
-    def validate_metadata_methods(self):
-        first_resource_id = self.validate_list_resources_and_get_first_resource()
-        self.validate_get_resource(first_resource_id)
-
-    def validate_list_resources_and_get_first_resource(self):
-        self.log("Trying to fetch resources list.")
-        try:
-            resources = self.list_resources(self.source, self.options)
-            self.log(f"Successfully fetched {len(resources)} resources.")
-            return resources[0]["id"]
-        except Exception as e:
-            raise UnableToListPanoplyResources(str(e))
-
-    def validate_get_resource(self, resource_id):
-        self.log(f"Trying to get resource `{resource_id}`.")
-        try:
-            resource = self.get_resource(self.source, self.options, resource_id)
-            fields_number = len(resource.get('fields', []))
-            self.log(f"Successfully fetched resource `{resource_id}` with {fields_number} fields.")
-        except Exception as e:
-            raise UnableToGetPanoplyResource(str(e))
+        """
+        Returns a list of resources the source can extract from.
+        The list depends on the user permissions.
+        """
 
     def log(self, *msgs):
         """ Log a message """

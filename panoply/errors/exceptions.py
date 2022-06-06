@@ -35,13 +35,3 @@ class TokenValidationException(PanoplyException):
 class WrongTypeOrValueError(Exception):
     def __init__(self, message: str):
         super().__init__(message)
-
-
-class UnableToListPanoplyResources(Exception):
-    def __init__(self, message: str):
-        super().__init__(message)
-
-
-class UnableToGetPanoplyResource(Exception):
-    def __init__(self, message: str):
-        super().__init__(message)
