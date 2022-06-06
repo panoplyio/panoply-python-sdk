@@ -1,30 +1,28 @@
 from datetime import datetime
 from typing import TypedDict, Dict, List
 
-from .errors.exceptions import WrongTypeOrValueError
 
-
-class PanoplyMetadata(TypedDict):
+class Metadata(TypedDict):
     resource_id: str
     timestamp: str
 
 
-class PanoplyRecord(TypedDict):
+class Record(TypedDict):
     data: Dict
-    metadata: PanoplyMetadata
+    metadata: Metadata
 
 
-class PanoplyRecordGroup(TypedDict):
+class RecordGroup(TypedDict):
     data: List[Dict]
-    metadata: PanoplyMetadata
+    metadata: Metadata
 
 
-def to_record(resource, data) -> PanoplyRecordGroup:
+def to_record(resource, data) -> RecordGroup:
     """ Converts data and resource to RecordGroup object """
     validate_resource(resource)
-    data = validate_and_transform_data_type(data)
+    data = normalize_data(data)
     timestamp = get_iso_string()
-    record_group = PanoplyRecordGroup(
+    record_group = RecordGroup(
         data=data,
         metadata={
             'resource_id': resource,
@@ -35,19 +33,21 @@ def to_record(resource, data) -> PanoplyRecordGroup:
 
 
 def validate_resource(resource):
-    if not isinstance(resource, str) or len(resource.strip()) == 0:
-        raise WrongTypeOrValueError("`resource` must be a non empty string")
+    if not isinstance(resource, str):
+        raise TypeError("`resource` must be of a type string")
+    if len(resource.strip()) == 0:
+        raise ValueError("`resource` must be a non empty string")
 
 
-def validate_and_transform_data_type(data):
+def normalize_data(data):
     if isinstance(data, list):
         if data and not isinstance(data[0], dict):
-            raise WrongTypeOrValueError("Objects inside returned list should be of type dict.")
+            raise TypeError("Objects inside returned list should be of type dict.")
         return data
     elif isinstance(data, dict):
         return [data]
     else:
-        raise WrongTypeOrValueError("The data returned should be of the type list or dict.")
+        raise TypeError("The data returned should be of the type list or dict.")
 
 
 def get_iso_string() -> str:

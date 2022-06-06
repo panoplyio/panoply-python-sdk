@@ -11,8 +11,8 @@ import requests
 
 from . import events
 from .errors.exceptions import TokenValidationException
-from .records import PanoplyRecordGroup
-from .resources import PanoplyResource
+from .records import RecordGroup
+from .resources import Resource
 
 
 class DataSource(events.Emitter, metaclass=ABCMeta):
@@ -25,19 +25,19 @@ class DataSource(events.Emitter, metaclass=ABCMeta):
         self.options = options
 
     @abstractmethod
-    def read(self, batch_size=None) -> List[PanoplyRecordGroup]:
+    def read(self, batch_size=None) -> List[RecordGroup]:
         """
         Reads data from the sources and returns it as record group
         """
 
     @abstractmethod
-    def get_resource(self, source, options, resource_id: str) -> PanoplyResource:
+    def get_resource(self, source, options, resource_id: str) -> Resource:
         """
         Returns a PanoplyResource object with the list of fields
         """
 
     @abstractmethod
-    def list_resources(self, source, options) -> List[PanoplyResource]:
+    def list_resources(self, source, options) -> List[Resource]:
         """
         Returns a list of resources the source can extract from.
         The list depends on the user permissions.

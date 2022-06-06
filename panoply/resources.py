@@ -1,16 +1,16 @@
 from typing import Optional, List, TypedDict
 
 
-class PanoplyField(TypedDict):
+class Field(TypedDict):
     name: str
     type: Optional[str]
     is_mandatory: Optional[bool]
     is_available: Optional[bool]
 
 
-class PanoplyResource(TypedDict):
+class Resource(TypedDict):
     id: str
     title: str
-    fields: Optional[List[PanoplyField]]
+    fields: Optional[List[Field]]
     required: Optional[bool]
     requires: Optional[List[str]]

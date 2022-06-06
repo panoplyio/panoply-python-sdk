@@ -30,8 +30,3 @@ class TokenValidationException(PanoplyException):
     def __init__(self, original_error, args=None, retryable=True):
         super().__init__(args, retryable)
         self.original_error = original_error
-
-
-class WrongTypeOrValueError(Exception):
-    def __init__(self, message: str):
-        super().__init__(message)
