@@ -33,7 +33,7 @@ class DataSource(events.Emitter, metaclass=ABCMeta):
     @abstractmethod
     def get_resource(self, source, options, resource_id: str) -> Resource:
         """
-        Returns a PanoplyResource object with the list of fields
+        Returns a resource object with the list of fields
         """
 
     @abstractmethod
