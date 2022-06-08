@@ -32,14 +32,14 @@ class DataSource(events.Emitter, metaclass=ABCMeta):
 
     @classmethod
     @abstractmethod
-    def get_resource(cls, resource_id: str, source, options) -> Resource:
+    def get_resource(cls, resource_id: str, source, options={}) -> Resource:
         """
         Returns a resource object with the list of fields
         """
 
     @classmethod
     @abstractmethod
-    def list_resources(cls, source, options) -> List[Resource]:
+    def list_resources(cls, source, options={}) -> List[Resource]:
         """
         Returns a list of resources the source can extract from.
         The list depends on the user permissions.
