@@ -32,7 +32,7 @@ class DataSource(events.Emitter, metaclass=ABCMeta):
 
     @classmethod
     @abstractmethod
-    def get_resource(cls, source, options, resource_id: str) -> Resource:
+    def get_resource(cls, resource_id: str, source, options) -> Resource:
         """
         Returns a resource object with the list of fields
         """
