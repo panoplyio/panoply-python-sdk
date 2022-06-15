@@ -4,7 +4,7 @@ from abc import abstractmethod, ABCMeta
 from concurrent.futures import ThreadPoolExecutor
 from functools import wraps
 from threading import Event
-from typing import List
+from typing import List, Dict, Union
 
 import backoff
 import requests
@@ -12,7 +12,6 @@ import requests
 from . import events
 from .errors.exceptions import TokenValidationException
 from .records import RecordGroup
-from .resources import Resource
 
 
 class DataSource(events.Emitter, metaclass=ABCMeta):
@@ -25,24 +24,9 @@ class DataSource(events.Emitter, metaclass=ABCMeta):
         self.options = options
 
     @abstractmethod
-    def read(self, batch_size=None) -> List[RecordGroup]:
+    def read(self, batch_size=None) -> List[Union[RecordGroup, Dict]]:
         """
         Reads data from the sources and returns it as record group
-        """
-
-    @classmethod
-    @abstractmethod
-    def get_resource(cls, resource_id: str, source, options={}) -> Resource:
-        """
-        Returns a resource object with the list of fields
-        """
-
-    @classmethod
-    @abstractmethod
-    def list_resources(cls, source, options={}) -> List[Resource]:
-        """
-        Returns a list of resources the source can extract from.
-        The list depends on the user permissions.
         """
 
     def log(self, *msgs):
