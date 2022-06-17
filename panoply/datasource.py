@@ -10,8 +10,9 @@ import backoff
 import requests
 
 from . import events
-from .errors.exceptions import TokenValidationException
+from .errors.exceptions import (TokenValidationException, MetadataNotSupportedException)
 from .records import RecordGroup
+from .resources import Resource
 
 
 class DataSource(events.Emitter, metaclass=ABCMeta):
@@ -28,6 +29,21 @@ class DataSource(events.Emitter, metaclass=ABCMeta):
         """
         Reads data from the sources and returns it as record group
         """
+
+    @classmethod
+    def get_resource(cls, resource_id: str, source, options={}) -> Resource:
+        """
+        Returns a resource object with the list of fields
+        """
+        raise MetadataNotSupportedException("`get_resource` method is not supported.")
+
+    @classmethod
+    def list_resources(cls, source, options={}) -> List[Resource]:
+        """
+        Returns a list of resources the source can extract from.
+        The list depends on the user permissions.
+        """
+        raise MetadataNotSupportedException("`list_resources` method is not supported.")
 
     def log(self, *msgs):
         """ Log a message """

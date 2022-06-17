@@ -30,3 +30,8 @@ class TokenValidationException(PanoplyException):
     def __init__(self, original_error, args=None, retryable=True):
         super().__init__(args, retryable)
         self.original_error = original_error
+
+
+class MetadataNotSupportedException(Exception):
+    def __init__(self, msg: str):
+        super().__init__(msg)
