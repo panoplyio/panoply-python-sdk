@@ -1,17 +1,21 @@
 import base64
 import traceback
+from abc import abstractmethod, ABCMeta
 from concurrent.futures import ThreadPoolExecutor
 from functools import wraps
 from threading import Event
+from typing import List, Dict, Union
 
 import backoff
 import requests
 
 from . import events
 from .errors.exceptions import TokenValidationException
+from .records import RecordGroup
+from .resources import Resource
 
 
-class DataSource(events.Emitter):
+class DataSource(events.Emitter, metaclass=ABCMeta):
     """ A base DataSource object """
 
     def __init__(self, source, options={}):
@@ -19,6 +23,27 @@ class DataSource(events.Emitter):
 
         self.source = source
         self.options = options
+
+    @abstractmethod
+    def read(self, batch_size=None) -> List[Union[RecordGroup, Dict]]:
+        """
+        Reads data from the sources and returns it as record group
+        """
+
+    @classmethod
+    def get_resource(cls, resource_id: str, source, options={}) -> Resource:
+        """
+        Returns a resource object with the list of fields
+        """
+        raise NotImplementedError("`get_resource` method is not supported.")
+
+    @classmethod
+    def list_resources(cls, source, options={}) -> List[Resource]:
+        """
+        Returns a list of resources the source can extract from.
+        The list depends on the user permissions.
+        """
+        raise NotImplementedError("`list_resources` method is not supported.")
 
     def log(self, *msgs):
         """ Log a message """
@@ -67,7 +92,8 @@ def __send_request(url, data):
 
 def validate_token(refresh_url, exceptions=(), callback=None,
                    access_key='access_token', refresh_key='refresh_token'):
-    ''' a decorator used to validate the access_token for oauth based
+    """
+    a decorator used to validate the access_token for oauth based
     data sources.
     This decorator should be used on every method in the data source that
     fetches data from the oauth controlled resource, and that relies on a
@@ -106,7 +132,7 @@ def validate_token(refresh_url, exceptions=(), callback=None,
         The refresh token key as defined in the source and in the request to
         the refresh URL.
         Defaults to `refresh_token`
-    '''
+    """
 
     def _validate_token(f):
         def wrapper(*args, **kwargs):
