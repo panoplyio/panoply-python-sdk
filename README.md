@@ -1,13 +1,14 @@
 # panoply-python-sdk
+
 SQS-based Python SDK for streaming data in real-time to the Panoply platform.
 
-#### Install
+## Install
 
-```
-$ python setup.py install
+```bash
+python setup.py install
 ```
 
-#### Usage
+## Usage
 
 ```python
 import panoply
@@ -15,39 +16,39 @@ conn = panoply.SDK( "APIKEY", "APISECRET" )
 conn.write( "tablename", { "foo": "bar" } )
 ```
 
-Note the SDK uses an internal buffer to store events and actually sends them once the buffer is full or a timeout is reached.
-If your scripts exits too early while the buffer is full - it is the developers responsibility to wait enough time for the timeout to occur.
-#### Generating an API Key and Secret
+> Note the SDK uses an internal buffer to store events and actually sends them once the buffer is full or a timeout is reached. If your scripts exits too early while the buffer is full - it is the developers responsibility to wait enough time for the timeout to occur.
+
+## Generating an API Key and Secret
 
 While logged into the Panoply.io platform, click to add a new data source.  Select the Panoply SDK as your data source. This will automatically generate and display in your browser an API key and API secret. Use this key and secret to instantiate SDK objects.
 
-#### API
+## API
 
-###### SDK( apikey, apisecret )
+### SDK( apikey, apisecret )
 
 Create a new SDK instance, and the underlying Thread for sending the data over HTTP.
 
-###### .write( tablename, data )
+### .write( tablename, data )
 
 Writes a record with the arbitrary `data` dictionary into `tablename`. Not that the record isn't saved immediately but instead it's buffered and will be saved within up to 2 seconds.
 
-###### .on( evname, handlerfn )
+### .on( evname, handlerfn )
 
 Sets the handler for the given event name. Available events are:
 
- * `send` - emitted immediately **before** sending a batch to the Panoply queue.
- * `flush` - emitted immediately **after** successfully sending a batch to the panoply queue.
- * `error` - emitted when an error occurred during the process.
+- `send` - emitted immediately **before** sending a batch to the Panoply queue.
+- `flush` - emitted immediately **after** successfully sending a batch to the panoply queue.
+- `error` - emitted when an error occurred during the process.
 
+## Building Data Sources
 
-# Building Data Sources
 The SDK also contains the building blocks for creating your own data source. The data source can be used to read data from any external source, like a database, or an API, and write the data to the Panoply.io platform. After the code is written, it can either be open-sourced or sent to the Panoply team in order to include it in the platform's UI.
 
 See an example of a working Data Source here:
 
-* [Librato Data Source](https://github.com/panoplyio/source-librato)
+- [Librato Data Source](https://github.com/panoplyio/source-librato)
 
-#### Base Data Source
+### Base Data Source
 
 You first need to create a Python class that inherits from the SDK's `panoply.DataSource` base class:
 
@@ -70,10 +71,9 @@ class MyDataSource(panoply.DataSource):
 
 The `DataSource` base class exposes the following methods:
 
-###### \_\_init\_\_(self, source, options)
+#### \_\_init\_\_(self, source, options)
 
 Constructor. Receives a dictionary with the data `source` parameters (see below) and a dictionary with any additional `options`. Generally, it's safe to disregard the options, however it may be used for performance optimizations, as it contains hints about incremental keys, excluded fields, etc. It may also contain additional parameters that can't be transferred with the source (e.g. secret keys).
-
 
 `source` and `options` are available as attributes from within the class instance.
 
@@ -86,29 +86,28 @@ def __init__(self, source, options):
         source['destination'] = source['type']
 ```
 
-
 **Make sure** to call `super()` with all the arguments if you need to override it.
 
-###### read(self, n = None)
+#### read(self, n = None)
 
 Required abstract function. Reads up to `N` objects from the source. `N` is just a hint for the number of objects to return, but it can be disregarded if it's not relevant for your specific data source. This method should return either:
 
-* List of arbitrary objects (python dictionaries). For performance sake, it's advised to return a large batch of objects, as close as possible to N.
-* `None`, to indicate an EOF when all of the available data has been read.
+- List of arbitrary objects (python dictionaries). For performance sake, it's advised to return a large batch of objects, as close as possible to N.
+- `None`, to indicate an EOF when all of the available data has been read.
 
-###### close(self)
+#### close(self)
 
 Optional abstract function. Close and cleanup any resources used by the data source, like temporary files, opened db connections, etc.
 
-###### log(self, *msgs)
+#### log(self, *msgs)
 
 Writes a message to the log. It's advised to add log lines extensively in order to debug issues in production. **NEVER** log user credentials or other sensitive information. This is also verified as part of our code review process when submitting a data source.
 
-###### progress(self, loaded, total, msg)
+#### progress(self, loaded, total, msg)
 
 Update the progress of the data source during calls to `read()`. It's used by the UI to show a progress bar, and for internal monitoring. You want to call `.progress()` at least once per `read()` call. `loaded` and `total` are integers, representing the number of resources loaded out of the total number of resources. It can be anything, like db rows, files, API calls, etc. `msg` is an optional human-readable text describing the progress status, for example: `3,000/6,000 files loaded`. For the best user experience, it is advised to provide a clear and coherent message.
 
-###### state(self, state_id, state)
+#### state(self, state_id, state)
 
 Report the current state of the data collection.
 
@@ -118,39 +117,39 @@ Report the current state of the data collection.
 
 For supported data sources, in the event of a failure, data collection is retried and this state object is provided together with the source dict to allow for the data source to continue from where it left off. An example of a state object would be the name of the current resource (tablename/api endpoint) and the number of data objects already fetched:
 
-    # Note that `tableName` is used as a key so that merging this state object
-    # into previous ones will override the loaded value.
-    {"state_id": "unique_id`, "state": { "tableName": "loaded": 500}}
+> Note that `tableName` is used as a key so that merging this state object into previous ones will override the loaded value.
+>
+> ```json
+> {"state_id": "unique_id`, "state": { "tableName": "loaded": 500}}
+> ```
 
 With this state object, the data source would be able to use the `loaded` value as a `SKIP` or `OFFSET` parameter.
 
-###### raw(self, tag, raw, metadata)
+#### raw(self, tag, raw, metadata)
 
 Constructs a `raw` message object.
 
 This is useful when you wish to send raw messages (bytes) and need a way to attach additional information to each message.
 
-* `tag` - A unique identifier that allows linking between the message and its metadata e.g. file name, batch ID etc.
-* `raw` - The raw message.
-* `metadata` - A dictionary of fields you wish to append to the message e.g. `{ '__state': 'my-state-id' }`
+- `tag` - A unique identifier that allows linking between the message and its metadata e.g. file name, batch ID etc.
+- `raw` - The raw message.
+- `metadata` - A dictionary of fields you wish to append to the message e.g. `{ '__state': 'my-state-id' }`
 
-###### fire(self, type, data)
+#### fire(self, type, data)
 
 Fire an event of type `type` with the specified `data`.
 
 Each data source comes with a predefined `source-change` event that can be fired to indicate that the source parameters have changed in order for the system to save the new parameters. The data in this case, is a dictionary of the changed parameters.
 
-
-#### Exceptions
+### Exceptions
 
 Exceptions that arise from data sources are not handled by the system. However, if the exceptions were originated from the `read` method, the system will retry the action 3 times before giving up on the task. While this may usually be the required process, there are times when a retry will not yield a different result (e.g HTTP 404 from a service the data source uses). For this reason, the SDK exposes the exception `panoply.errors.PanoplyException` that includes a `retryable` boolean attribute specifying whether the system should retry or not.
 
-
-#### Configuration
+### Configuration
 
 Your python module should expose the following fixed attributes:
 
-###### Stream
+#### Stream
 
 Reference to your inherited Data Source class.
 
@@ -158,7 +157,7 @@ Reference to your inherited Data Source class.
 Stream = MyDataSource
 ```
 
-###### CONFIG
+#### CONFIG
 
 A dictionary with configuration details for the data source.
 
@@ -187,11 +186,11 @@ CONFIG["params"] = [
 ]
 ```
 
-#### Decorators
+### Decorators
 
 The SDK exposes some utilities to help with tasks that recur in many data sources:
 
-###### panoply.validate_token(refresh_url, exceptions, callback=None, access_key='access_token', refresh_key='refresh_token')
+#### panoply.validate_token(refresh_url, exceptions, callback=None, access_key='access_token', refresh_key='refresh_token')
 
 The `validate_token` decorator may be used in data sources having OAuth2 authentication, that need to validate (refresh) the token. It should be placed before a method that implements a request (the point of failure in case the token is invalid), within the class that inherits from the SDK's `panoply.DataSource` base class and implements `read()`. This decorator receives a `refresh_url` string indicating the URL to call in order to refresh the token, an `exceptions` tuple (or single exception) that indicate the exceptions that should be caught in order to refresh the token, `callback` which is an optional `string` (in case it is a method of the data source) or `callable` to call upon receiving the new token (that will be passed as a parameter to the specified callback), an optional `access_key` string indicating the access token key (default: 'access_token') and an optional 'refresh_key' string indicating the refresh token key (default: 'refresh_token').
 
@@ -215,13 +214,12 @@ class Stream(panoply.DataSource):
         ...
 ```
 
-
-#### Tests and publishing
+### Tests and publishing
 
 Every data source is code-reviewed by the Panoply.io team before being integrated to the system. In order to save time, make sure that:
 
-* You follow the best-practices and standard code conventions for the programming language used.
-* Keep it slim. Avoid too many dependencies if possible.
-* Test it throughly with unit-tests.
-* Add an annotated git tag with the version number (eg: v1.0.0) to the master branch locking the data source to a specific version.
-* Notify the Panoply.io team of your data source, and we will integrate it promptly.
+- You follow the best-practices and standard code conventions for the programming language used.
+- Keep it slim. Avoid too many dependencies if possible.
+- Test it throughly with unit-tests.
+- Add an annotated git tag with the version number (eg: v1.0.0) to the master branch locking the data source to a specific version.
+- Notify the Panoply.io team of your data source, and we will integrate it promptly.
