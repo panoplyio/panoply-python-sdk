@@ -31,7 +31,6 @@ jobs:
 
   run-tests:
     name: 🧪 Run tests
-    needs: [retrieve-metadata]
     runs-on: ubuntu-20.04
     steps:
       - name: 🐙 Checkout repository
