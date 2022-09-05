@@ -1,85 +1,122 @@
-name: Full CI/CD
+name: 🚀 CI/CD for Panoply Python SDK
 
 on:
   push:
-    branches: [ master ]
+    branches: [master]
 
   pull_request:
-    branches: [ master ]
+    branches: [master]
+
+env:
+  python_version: 3.8.2
 
 jobs:
-  test_and_lint:
-    name: Run tests and linters
-    runs-on: ubuntu-18.04
-    strategy:
-      matrix:
-        python: [ 3.8.2 ]
-    steps:
-    - name: Checkout this repository
-      uses: actions/checkout@v2
-
-    - name: Set up python
-      uses: actions/setup-python@v2
-      with:
-        python-version: ${{ matrix.python }}
-
-    - name: Install
-      env:
-        GITAUTH: ${{ secrets.CI_USER_GITHUB_TOKEN }}
-      run: |
-        python -m pip install -e .[test]
-
-    - name: Run tests and coverage
-      id: testing
-      run: |
-        if python -c "import pytest"; then
-          coverage run -m pytest tests
-        else
-          coverage run -m unittest discover tests
-        fi
-        coverage report -m
-
-    - name: Run linters
-      if: |
-        success() && steps.testing.outcome == 'success' ||
-        failure() && steps.testing.outcome == 'failure'
-      run: |
-        pycodestyle --format=pylint --max-line-length=120 --count .
-
-  check_version:
-    name: Check for version tag availability
-    runs-on: ubuntu-18.04
+  check-version:
+    name: 🔍 Check version
+    runs-on: ubuntu-20.04
     outputs:
-      version: ${{ steps.version.outputs.version }}
+      version: ${{ steps.retrieve-version.outputs.version }}
     steps:
-    - name: Checkout this repository
-      uses: actions/checkout@v2
+      - name: 🐙 Checkout repository
+        uses: actions/checkout@v3
 
-    - name: Retrieve version
-      run: |
-        echo "TAG_NAME=$(python setup.py --version)" >> $GITHUB_ENV
+      - name: 📝 Retrieve version
+        id: retrieve-version
+        run: |
+          echo "::set-output name=version::$(python setup.py --version 2> /dev/null)"
 
-    - name: Output version
-      id: version
-      run: |
-        echo "::set-output name=version::${{env.TAG_NAME}}"
+      - name: 🔍 Check git tag availability
+        run: |
+          ! git ls-remote --exit-code --tags origin v${{ steps.retrieve-version.outputs.version }}
 
-    - name: Check tag name availability
-      run: |
-        ! git ls-remote --exit-code --tags origin "v${{ env.TAG_NAME }}"
+  run-tests:
+    name: 🧪 Run tests
+    runs-on: ubuntu-20.04
+    steps:
+      - name: 🐙 Checkout repository
+        uses: actions/checkout@v3
 
-  create_release:
-    name: Create release
-    needs: [ test_and_lint, check_version ]
+      - name: 🔧 Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.python_version }}
+          cache: pip
+          cache-dependency-path: setup.py
+
+      - name: 📦 Install dependencies
+        run: |
+          python -m pip install -e .[test]
+
+      - name: 👁️ Run linters
+        run: |
+          pycodestyle --format=pylint --max-line-length=120 --count .
+
+      - name: 🧪 Run tests
+        run: |
+          coverage run -m unittest discover tests
+
+      - name: 📢 Report coverage
+        run: |
+          coverage report -im
+
+  create-release:
+    name: 🎉 Create release
+    needs: [check-version, run-tests]
     if: github.event_name == 'push'
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-20.04
+    permissions:
+      contents: write
     steps:
-    - name: Checkout this repository
-      uses: actions/checkout@v2
+      - name: 🎉 Create release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: v${{ needs.check-version.outputs.version }}
+          target_commitish: ${{ github.sha }}
 
-    - name: Create release
-      uses: actions/create-release@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.CI_USER_GITHUB_TOKEN }}
-      with:
-        tag_name: "v${{ needs.check_version.outputs.version }}"
+  send-notifications:
+    name: 🔔 Send notifications
+    needs: [check-version, run-tests, create-release]
+    if: github.event_name == 'push' && always()
+    runs-on: ubuntu-20.04
+    steps:
+      - name: 📝 Retrieve workflow result
+        id: retrieve-workflow-result
+        run: |
+          if [ ${{ needs.check-version.result }} = 'success' ] \
+          && [ ${{ needs.run-tests.result }} = 'success' ] \
+          && [ ${{ needs.create-release.result }} = 'success' ]
+          then
+            echo "::set-output name=result::success"
+            echo "::set-output name=message::succeeded"
+          elif [ ${{ needs.check-version.result }} = 'cancelled' ] \
+            || [ ${{ needs.run-tests.result }} = 'cancelled' ] \
+            || [ ${{ needs.create-release.result }} = 'cancelled' ]
+          then
+            echo "::set-output name=result::cancelled"
+            echo "::set-output name=message::canceled"
+          else
+            echo "::set-output name=result::failure"
+            echo "::set-output name=message::failed"
+          fi
+
+      - name: 📝 Retrieve origin url message
+        id: retrieve-origin-url-message
+        run: |
+          echo "::set-output name=message::<https://github.com/${{ github.repository }}/commit/${{ github.sha }}|$(echo ${{ github.sha }} | cut -c1-9)>"
+
+      - name: 🔔 Send Slack notification
+        uses: rtCamp/action-slack-notify@v2
+        env:
+          SLACK_TITLE: ' '
+          SLACK_COLOR: ${{ steps.retrieve-workflow-result.outputs.result }}
+          SLACK_MESSAGE: >-
+            <https://github.com/${{ github.repository }}/commit/${{ github.sha }}/checks|Workflow>
+            of ${{ steps.retrieve-origin-url-message.outputs.message }}
+            on <https://github.com/${{ github.repository }}/tree/v${{ needs.check-version.outputs.version }}|${{ github.repository }}@v${{ needs.check-version.outputs.version }}>
+            by ${{ github.actor }}
+            ${{ steps.retrieve-workflow-result.outputs.message }}
+          SLACK_MSG_AUTHOR: ' '
+          SLACK_CHANNEL: ${{ secrets.SLACK_CHANNEL }}
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+          SLACK_FOOTER: ' '
+          MSG_MINIMAL: true
