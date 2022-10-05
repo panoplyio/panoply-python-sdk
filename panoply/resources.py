@@ -12,5 +12,6 @@ class Resource(TypedDict):
     id: str
     title: str
     fields: Optional[List[Field]]
+    available: Optional[bool]
     required: Optional[bool]
     requires: Optional[List[str]]
