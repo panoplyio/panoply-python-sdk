@@ -17,27 +17,15 @@ class Resource(TypedDict):
     requires: Optional[List[str]]
 
 
-def list_resources(resources: List[Resource]) -> Optional[List[Dict]]:
-    if resources:
+def convert_to_ui_format(items, create_name, create_value,
+                         is_disabled=lambda item: False, requires=lambda item: []):
+    if items:
         return [
-            {"name": resource["title"],
-             "value": resource["id"],
-             "disabled": not resource.get("available", True),
-             "required": resource.get("required", False),
-             "requires": resource.get("requires", [])}
-            for resource in resources]
-    else:
-        return
-
-
-def list_fields(fields: List[Field]) -> Optional[List[Dict]]:
-    if fields:
-        return [
-            {"name": f"{field['name']} [{field['type']}]" if field.get("type") else field["name"],
-             "value": field["name"],
-             "type": field.get("type"),
-             "is_mandatory": field.get("is_mandatory", False),
-             "disabled": not field.get("is_available", True)}
-            for field in fields]
+            {"name": create_name(item),
+             "value": create_value(item),
+             "disabled": is_disabled(item),
+             "requires": requires(item)
+             }
+            for item in items]
     else:
         return

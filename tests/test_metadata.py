@@ -1,6 +1,6 @@
 import unittest
 
-from panoply.resources import (list_resources, list_fields)
+from panoply.resources import convert_to_ui_format
 
 
 class TestMetadata(unittest.TestCase):
@@ -11,43 +11,47 @@ class TestMetadata(unittest.TestCase):
             ([{"title": "Customer", "id": "customer"},
               {"title": "Account", "id": "account"}],
              [{"name": "Customer", "value": "customer",
-               "disabled": False, "required": False, "requires": []},
+               "disabled": False, "requires": []},
               {"name": "Account", "value": "account",
-               "disabled": False, "required": False, "requires": []}
+               "disabled": False, "requires": []}
               ]),
             ([{"title": "Customer", "id": "customer", "available": False},
               {"title": "Account", "id": "account", "requires": ["Billing"]}],
              [{"name": "Customer", "value": "customer",
-               "disabled": True, "required": False, "requires": []},
+               "disabled": True, "requires": []},
               {"name": "Account", "value": "account",
-               "disabled": False, "required": False, "requires": ["Billing"]}
+               "disabled": False, "requires": ["Billing"]}
               ]),
             ([], None)
         ]
 
-        for test_case, expected in test_cases:
-            self.assertEqual(expected, list_resources(test_case))
+        for resources, expected in test_cases:
+            self.assertEqual(expected, convert_to_ui_format(resources,
+                                                            lambda resource: resource["title"],
+                                                            lambda resource: resource["id"],
+                                                            lambda resource: not resource.get("available", True),
+                                                            lambda resource: resource.get("requires", [])
+                                                            ))
 
     def test_list_fields(self):
 
         test_cases = [
             ([{"name": "id", "is_mandatory": True}, {"name": "name"}],
-             [{"name": "id", "value": "id", "type": None,
-               "is_mandatory": True, "disabled": False},
-              {"name": "name", "value": "name", "type": None,
-               "is_mandatory": False, "disabled": False}
-              ]),
+             [{"name": "id", "value": "id", "disabled": False, "requires": []},
+              {"name": "name", "value": "name", "disabled": False, "requires": []}]),
             ([{"name": "id", "type": "int", "is_mandatory": True},
               {"name": "name", "type": "str"},
               {"name": "billing", "type": "list", "is_available": False}],
-             [{"name": "id [int]", "value": "id", "type": "int",
-               "is_mandatory": True, "disabled": False},
-              {"name": "name [str]", "value": "name", "type": "str",
-               "is_mandatory": False, "disabled": False},
-              {"name": "billing [list]", "value": "billing", "type": "list",
-               "is_mandatory": False, "disabled": True}]),
+             [{"name": "id [int]", "value": "id", "disabled": False, "requires": []},
+              {"name": "name [str]", "value": "name", "disabled": False, "requires": []},
+              {"name": "billing [list]", "value": "billing", "disabled": True, "requires": []}]),
             ([], None)
         ]
 
-        for test_case, expected in test_cases:
-            self.assertEqual(expected, list_fields(test_case))
+        for fields, expected in test_cases:
+            self.assertEqual(expected, convert_to_ui_format(fields,
+                                                            lambda field: f"{field['name']} [{field['type']}]"
+                                                            if field.get("type") else field["name"],
+                                                            lambda field: field["name"],
+                                                            lambda field: not field.get("is_available", True)
+                                                            ))
