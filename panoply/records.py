@@ -51,5 +51,5 @@ def normalize_data(data):
 
 
 def get_iso_string() -> str:
-    now = datetime.now()
+    now = datetime.utcnow()
     return f"{now.isoformat(timespec='milliseconds')}Z"
