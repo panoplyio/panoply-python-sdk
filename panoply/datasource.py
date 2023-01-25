@@ -1,8 +1,10 @@
 import base64
 import traceback
+import concurrent.futures.thread
 from concurrent.futures import ThreadPoolExecutor
 from functools import wraps
 from threading import Event
+from time import time
 
 import backoff
 import requests
@@ -153,7 +155,7 @@ def validate_token(refresh_url, exceptions=(), callback=None,
     return _validate_token
 
 
-def background_progress(message, waiting_interval=10 * 60):
+def background_progress(message, waiting_interval=10 * 60, timeout=None):
     """ A decorator is used to emit progress while long operation is executed.
         For example, for database's data sources such operations might be
         declaration of the cursor or counting number of rows.
@@ -167,6 +169,9 @@ def background_progress(message, waiting_interval=10 * 60):
        waiting_interval : float
            Time in seconds to wait between progress emitting.
            Defaults to 10 minutes
+       timeout : float
+           Time in seconds for maximum progress emiting time.
+           Defaults to no limit
     """
 
     def _background_progress(func):
@@ -175,11 +180,17 @@ def background_progress(message, waiting_interval=10 * 60):
             self = args[0]
             self.log('Creating background progress emitter')
             finished = Event()
+            started_at = time()
             with ThreadPoolExecutor(max_workers=1) as executor:
                 func_future = executor.submit(func, *args, **kwargs)
                 func_future.add_done_callback(lambda future: finished.set())
 
                 while not func_future.done():
+                    if timeout and (time() - started_at) > timeout:
+                        self.log("Max waiting time exceeded")
+                        executor._threads.clear()
+                        concurrent.futures.thread._threads_queues.clear()
+                        raise Exception("Max waiting time exceeded")
                     self.log(message)
                     self.progress(None, None, message)
                     finished.wait(timeout=waiting_interval)
