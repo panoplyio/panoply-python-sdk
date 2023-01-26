@@ -179,6 +179,8 @@ def background_progress(message, waiting_interval=10 * 60, timeout=None):
         def wrapper(*args, **kwargs):
             self = args[0]
             self.log('Creating background progress emitter')
+            if max_wait:
+                self.log(f'Timeout is set to {max_wait} seconds')
             finished = Event()
             started_at = time()
             with ThreadPoolExecutor(max_workers=1) as executor:
@@ -187,7 +189,7 @@ def background_progress(message, waiting_interval=10 * 60, timeout=None):
 
                 while not func_future.done():
                     if timeout and (time() - started_at) > timeout:
-                        self.log("Max waiting time exceeded")
+                        self.log("Max waiting time exceeded. Clearing threads.")
                         executor._threads.clear()
                         concurrent.futures.thread._threads_queues.clear()
                         raise Exception("Max waiting time exceeded")
