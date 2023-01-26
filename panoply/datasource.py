@@ -200,3 +200,4 @@ def background_progress(message, waiting_interval=10 * 60, timeout=None):
         return wrapper
 
     return _background_progress
+
