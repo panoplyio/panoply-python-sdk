@@ -179,7 +179,7 @@ def background_progress(message, waiting_interval=10 * 60, timeout=24*60*60):
         def wrapper(*args, **kwargs):
             self = args[0]
             self.log('Creating background progress emitter')
-            self.log(f'Timeout is set to {max_wait} seconds')
+            self.log(f'Timeout is set to {timeout} seconds')
             finished = Event()
             started_at = time()
             with ThreadPoolExecutor(max_workers=1) as executor:
