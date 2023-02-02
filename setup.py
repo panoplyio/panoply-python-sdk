@@ -15,9 +15,8 @@ exec(
 setup(
     name=__package_name__,
     version=__version__,
-    packages=["panoply", "panoply.errors"],
-    package_data={'panoply': ['.flake8', 'pyproject.toml']},
-    include_package_data=True,
+    packages=["panoply", "panoply.errors", "scripts"],
+    package_data={"scripts": [".flake8", "ruff.toml"]},
     install_requires=[
         "requests==2.21.0",
         "oauth2client==4.1.1",
@@ -34,4 +33,5 @@ setup(
     url="https://github.com/panoplyio/panoply-python-sdk",
     author="Panoply.io",
     author_email="support@panoply.io",
+    entry_points={'console_scripts': ['launch_linters=scripts.launch_linters:main']},
 )
