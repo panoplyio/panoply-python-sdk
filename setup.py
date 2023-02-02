@@ -16,6 +16,7 @@ setup(
     name=__package_name__,
     version=__version__,
     packages=["panoply", "panoply.errors"],
+    package_data={'panoply': ['.flake8', 'pyproject.toml']},
     include_package_data=True,
     install_requires=[
         "requests==2.21.0",
