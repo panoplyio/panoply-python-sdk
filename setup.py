@@ -33,5 +33,5 @@ setup(
     url="https://github.com/panoplyio/panoply-python-sdk",
     author="Panoply.io",
     author_email="support@panoply.io",
-    entry_points={'console_scripts': ['launch_linters=scripts.launch_linters:main']},
+    entry_points={"console_scripts": ["launch_linters=scripts.launch_linters:main"]},
 )
