@@ -1,0 +1,12 @@
+[tool.ruff]
+line-length = 120
+target-version = 'py38'
+select = ['E', 'Q', 'T20', 'F', 'N', 'C4', 'COM', 'I', 'UP', 'A', 'SIM', 'TID', 'A']
+
+[tool.ruff.flake8-quotes]
+inline-quotes = 'single'
+
+[tool.black]
+line-length = 120
+target-version = ['py38']
+skip-string-normalization = true

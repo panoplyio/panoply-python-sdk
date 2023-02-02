@@ -1,0 +1,8 @@
+[flake8]
+exclude = .git,__pycache__,docs/source/conf.py,old,build,dist,venv*,test*
+inline-quotes = "single"
+max-line-length = 120
+ignore = D100, D103, D400, D104, W503
+max-expression-complexity=7
+max-cognitive-complexity=7
+max-function-length=50
