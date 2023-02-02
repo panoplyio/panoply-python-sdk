@@ -16,6 +16,7 @@ setup(
     name=__package_name__,
     version=__version__,
     packages=["panoply", "panoply.errors"],
+    include_package_data=True,
     install_requires=[
         "requests==2.21.0",
         "oauth2client==4.1.1",
