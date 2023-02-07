@@ -29,12 +29,15 @@ def get_commands():
 
 def main():
     commands = get_commands()
+    errors = []
     for command in commands:
         try:
             sp.check_call(command)
         except sp.CalledProcessError:
-            logger.error(f"Error: {command[0]}")
-            sys.exit(1)
+            errors.append(command[0])
+    if errors:
+        logger.error(f"Error raised from: {', '.join(errors)}")
+        sys.exit(1)
 
 
 if __name__ == '__main__':
