@@ -30,7 +30,7 @@ def main():
     commands = get_commands()
     for command in commands:
         try:
-            sp.call(command)
+            sp.check_call(command)
         except Exception as e:
             logger.error(f'Error: {e}')
 
