@@ -2,6 +2,7 @@ import argparse
 import logging
 import os
 import subprocess as sp
+import sys
 
 parser = argparse.ArgumentParser()
 parser.add_argument('-s', '--static', action='store_true', help='Will not fix errors, or format code')
@@ -31,8 +32,9 @@ def main():
     for command in commands:
         try:
             sp.check_call(command)
-        except Exception as e:
-            logger.error(f'Error: {e}')
+        except sp.CalledProcessError:
+            logger.error(f"Error: {command[0]}")
+            sys.exit(1)
 
 
 if __name__ == '__main__':
