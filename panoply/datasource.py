@@ -139,6 +139,9 @@ def validate_token(refresh_url, exceptions=(), callback=None,
                             _callback = getattr(self, callback)
                         _callback(self.source.get(access_key))
                 except Exception as e:
+                    response = getattr(e, 'response', None)
+                    if isinstance(response, requests.Response):
+                        self.log(response.text)
                     self.log('Error: Access token can\'t be revalidated. '
                              'The user would have to re-authenticate',
                              traceback.format_exc())
