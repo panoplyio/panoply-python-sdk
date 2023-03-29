@@ -1,12 +1,21 @@
 """
     Module for storing SSH related stuff
 """
+import logging
 from typing import Dict
 from paramiko import RSAKey, Ed25519Key, SSHException
 from sshtunnel import SSHTunnelForwarder
 from io import StringIO
+from sys import stdout
 
 from .errors import IncorrectParamError
+
+
+def get_stdout_only_logger():
+    logger = logging.getLogger("STDOUTONLY")
+    stream_handler = logging.StreamHandler(stream=stdout)
+    logger.addHandler(stream_handler)
+    return logger
 
 
 class SSHTunnel:
@@ -144,7 +153,8 @@ class SSHTunnel:
             ssh_username=self.tunnel["username"],
             ssh_password=self.tunnel.get("password"),
             ssh_pkey=pkey,
-            remote_bind_address=(self.host, self.port)
+            remote_bind_address=(self.host, self.port),
+            logger=get_stdout_only_logger()
         )
         server.start()
 
