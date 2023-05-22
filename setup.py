@@ -17,7 +17,7 @@ setup(
     version=__version__,
     packages=["panoply", "panoply.errors"],
     install_requires=[
-        "requests==2.21.0",
+        "requests==2.31.0",
         "oauth2client==4.1.1",
         "backoff==1.10.0",
         "sshtunnel==0.1.5",
