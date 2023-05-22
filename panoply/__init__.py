@@ -1,9 +1,14 @@
+import logging
+
 from sys import stdout
 from traceback import print_exception as _print_exception
 
 from .datasource import *
 from .sdk import *
 from .ssh import SSHTunnel
+
+
+logging.basicConfig(stream=stdout)
 
 
 def custom_excepthook(args, /):
@@ -20,14 +25,9 @@ def custom_excepthook(args, /):
         # silently ignore SystemExit
         return
 
-    print(f"Caught an exception in thread:")
+    logging.error(f"Caught an exception in thread:")
     _print_exception(args.exc_type, args.exc_value, args.exc_traceback,
                      file=stdout)
 
 
 threading.excepthook = custom_excepthook
-
-# create console logger and log messages to STDOUT (default stream is STDERR)
-logger = logging.getLogger(__name__)
-console_handler = logging.StreamHandler(stream=stdout)
-logger.addHandler(console_handler)
