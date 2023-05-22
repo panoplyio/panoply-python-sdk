@@ -8,7 +8,7 @@ from .sdk import *
 from .ssh import SSHTunnel
 
 
-logging.basicConfig(stream=stdout)
+logging.basicConfig(stream=stdout, format='%(levelname)s: %(message)s')
 
 
 def custom_excepthook(args, /):
