@@ -26,3 +26,8 @@ def custom_excepthook(args, /):
 
 
 threading.excepthook = custom_excepthook
+
+# create console logger and log messages to STDOUT (default stream is STDERR)
+logger = logging.getLogger(__name__)
+console_handler = logging.StreamHandler(stream=stdout)
+logger.addHandler(console_handler)
