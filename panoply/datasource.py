@@ -5,6 +5,7 @@ from concurrent.futures import ThreadPoolExecutor
 from functools import wraps
 from threading import Event
 from time import time
+from typing import List
 
 import backoff
 import requests
@@ -205,3 +206,8 @@ def background_progress(message, waiting_interval=10 * 60, timeout=24*60*60):
 
     return _background_progress
 
+
+def get_compound_keys(data_key: str) -> List[str]:
+    data_key = data_key.replace('\\.', '<ESCAPED_DOT>')  # replace \.
+    compound_keys = data_key.split(".")
+    return [key.replace('<ESCAPED_DOT>', '.') for key in compound_keys]
