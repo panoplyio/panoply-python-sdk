@@ -1,14 +1,15 @@
 import base64
+import backoff
+import requests
 import traceback
 import concurrent.futures.thread
+
 from concurrent.futures import ThreadPoolExecutor
 from functools import wraps
 from threading import Event
 from time import time
 from typing import List
-
-import backoff
-import requests
+from jsonpath_ng import jsonpath, parse
 
 from . import events
 from .errors.exceptions import TokenValidationException
@@ -207,7 +208,23 @@ def background_progress(message, waiting_interval=10 * 60, timeout=24*60*60):
     return _background_progress
 
 
-def get_compound_keys(data_key: str) -> List[str]:
-    data_key = data_key.replace('\\.', '<ESCAPED_DOT>')  # replace \.
-    compound_keys = data_key.split(".")
-    return [key.replace('<ESCAPED_DOT>', '.') for key in compound_keys]
+def get_nested_data(data, key_path: str) -> List[str]:
+    if not data:
+        return
+    path = key_path if '$.' in key_path else '$.' + key_path
+    expression = parse(path)
+    result = expression.find(data)
+    if len(result) > 1:
+        return [res.value for res in result]
+    if not result:
+        raise KeyError
+    return result[0].value
+
+
+def update_or_create_nested_data(data, key_path, value):
+    if not data:
+        return data
+    path = key_path if key_path.startswith('$.') else '$.' + key_path
+    expression = parse(path)
+    result = expression.update_or_create(data, value)
+    return result

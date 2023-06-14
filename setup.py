@@ -22,6 +22,7 @@ setup(
         "backoff==1.10.0",
         "sshtunnel==0.1.5",
         "paramiko==2.11.0",
+        "jsonpath-ng==1.5.3",
     ],
     extras_require={
         "test": [
