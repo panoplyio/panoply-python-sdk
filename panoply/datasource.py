@@ -8,7 +8,7 @@ from concurrent.futures import ThreadPoolExecutor
 from functools import wraps
 from threading import Event
 from time import time
-from typing import List, Union, Any
+from typing import List, Any
 from jsonpath_ng import parse
 
 from . import events
@@ -208,20 +208,13 @@ def background_progress(message, waiting_interval=10 * 60, timeout=24*60*60):
     return _background_progress
 
 
-def get_nested_data(data, key_path: str) -> Union[List[Any], Any, None]:
-    """
-    Will return None if no data,
-    list of values if there are multiple results found
-    and one value if only one value found
-    """
+def get_nested_data(data, key_path: str) -> List[Any]:
     if not data:
-        return
+        return []
     # use JSONPath to get nested data from dict. See jsonpath.com for examples.
     path = key_path if '$.' in key_path else '$.' + key_path
     expression = parse(path)
     result = expression.find(data)
-    if len(result) > 1:
+    if result:
         return [res.value for res in result]
-    if not result:
-        raise KeyError
-    return result[0].value
+    raise KeyError
