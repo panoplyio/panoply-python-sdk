@@ -22,6 +22,7 @@ setup(
         "backoff==1.10.0",
         "sshtunnel==0.1.5",
         "paramiko==2.11.0",
+        "cryptography == 42.0.8",
     ],
     extras_require={
         "test": [
