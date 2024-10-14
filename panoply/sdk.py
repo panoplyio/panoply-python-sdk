@@ -1,16 +1,15 @@
 import base64
 import json
+import queue
+import threading
 import time
-import urllib.request
 import urllib.error
 import urllib.parse
-import threading
-import queue
-import logging
+import urllib.request
 from copy import copy
-from .constants import __package_name__, __version__
 
 from . import events
+from .constants import __package_name__, __version__
 
 MAXSIZE = 1024 * 250  # 250kib
 FLUSH_TIMEOUT = 2.0   # 2 seconds
