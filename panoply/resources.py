@@ -1,4 +1,4 @@
-from typing import Optional, List, TypedDict, Dict
+from typing import List, Optional, TypedDict
 
 
 class Field(TypedDict):
