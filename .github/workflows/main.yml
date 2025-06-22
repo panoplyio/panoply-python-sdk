@@ -8,12 +8,12 @@ on:
     branches: [master]
 
 env:
-  python_version: 3.8.2
+  python_version: 3.11.12
 
 jobs:
   check-version:
     name: 🔍 Check version
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     outputs:
       version: ${{ steps.retrieve-version.outputs.version }}
     steps:
@@ -31,7 +31,7 @@ jobs:
 
   run-tests:
     name: 🧪 Run tests
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
       - name: 🐙 Checkout repository
         uses: actions/checkout@v3
@@ -63,7 +63,7 @@ jobs:
     name: 🎉 Create release
     needs: [check-version, run-tests]
     if: github.event_name == 'push'
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     permissions:
       contents: write
     steps:
@@ -77,32 +77,29 @@ jobs:
     name: 🔔 Send notifications
     needs: [check-version, run-tests, create-release]
     if: github.event_name == 'push' && always()
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
       - name: 📝 Retrieve workflow result
         id: retrieve-workflow-result
         run: |
-          if [ ${{ needs.check-version.result }} = 'success' ] \
-          && [ ${{ needs.run-tests.result }} = 'success' ] \
-          && [ ${{ needs.create-release.result }} = 'success' ]
-          then
-            echo "::set-output name=result::success"
-            echo "::set-output name=message::succeeded"
-          elif [ ${{ needs.check-version.result }} = 'cancelled' ] \
-            || [ ${{ needs.run-tests.result }} = 'cancelled' ] \
-            || [ ${{ needs.create-release.result }} = 'cancelled' ]
-          then
-            echo "::set-output name=result::cancelled"
-            echo "::set-output name=message::canceled"
-          else
-            echo "::set-output name=result::failure"
-            echo "::set-output name=message::failed"
-          fi
-
-      - name: 📝 Retrieve origin url message
-        id: retrieve-origin-url-message
-        run: |
-          echo "::set-output name=message::<https://github.com/${{ github.repository }}/commit/${{ github.sha }}|$(echo ${{ github.sha }} | cut -c1-9)>"
+          case "${{ inputs.job-status }}" in
+          success)
+            action='Published'
+            ;;
+          failure)
+            action='Failed to publish'
+            ;;
+          cancelled)
+            action='Cancelled publishing'
+            ;;
+          *)
+            echo "::error::Unknown job status: `$JOB_STATUS`"
+            exit 1
+            ;;
+          esac
+          version="<https://github.com/$GITHUB_REPOSITORY/commit/$GITHUB_SHA|$([ "$VERSION" ] && echo "$VERSION" || echo "$GITHUB_SHA" | cut -c1-7)>"
+          repository="<https://github.com/${{ github.repository }}/tree/${{ github.ref_name }}|${{ github.repository }}@${{ github.ref_name }}>"
+          echo "message=$action $version from $repository" >> $GITHUB_OUTPUT
 
       - name: 🔔 Send Slack notification
         uses: rtCamp/action-slack-notify@v2
